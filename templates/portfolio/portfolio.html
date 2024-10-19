@@ -1,0 +1,27 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Portfolio{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Your Portfolios</h2>
+    <h3>Here you will find details about your portfolios, including stocks, indices, and their performance.</h3>
+    
+    {% if has_portfolios %}
+        <div class="list-group">
+            {% for portfolio in user_portfolios %}
+                <a href="{% url 'portfolio_detail' portfolio.id %}" class="list-group-item list-group-item-action">
+                    <h5 class="mb-1">{{ portfolio.name }}</h5>
+                    <p class="mb-1">{{ portfolio.description }}</p>
+                    <small>Created on {{ portfolio.created_at }}</small>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            You currently don't have any portfolios. Create a new portfolio to get started!
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

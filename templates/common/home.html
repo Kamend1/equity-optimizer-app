@@ -1,0 +1,11 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="jumbotron text-center">
+    <h1>Welcome to the Stock Portfolio App</h1>
+    <p>Analyze and optimize your stock portfolio with ease.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'stock_list' %}" role="button">Get Started</a>
+</div>
+{% endblock %}

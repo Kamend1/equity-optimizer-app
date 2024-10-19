@@ -1,0 +1,37 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Stock Detail{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        {% if stock %}
+            <h1>{{ stock.name }} ({{ stock.ticker }})</h1>
+            <dl class="row">
+                <dt class="col-sm-3">Sector:</dt>
+                <dd class="col-sm-9">{{ stock.sector }}</dd>
+                <dt class="col-sm-3">Market Cap:</dt>
+                <dd class="col-sm-9">{{ stock.market_cap }}</dd>
+                <dt class="col-sm-3">Enterprise Value:</dt>
+                <dd class="col-sm-9">{{ stock.enterprise_value }}</dd>
+                <!-- Add other stock attributes here -->
+            </dl>
+
+            <!-- Form to analyze the stock -->
+            
+         
+            <form action="{% url 'analyze_stock' stock.ticker %}" method="get">
+                {% csrf_token %}
+                 <button type="submit" class="btn btn-primary">Analyze Stock</button>
+            </form>
+
+        {% else %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+        
+        <!-- Button to go back to the stock list -->
+        <a href="{% url 'stock_list' %}" class="btn btn-secondary mt-3">Back to Stock List</a>
+    </div>
+{% endblock %}
+

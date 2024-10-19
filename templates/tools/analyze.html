@@ -1,0 +1,47 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Analyze Stock{% endblock %}
+
+{% block content %}
+    <!-- Date Range Selection Form -->
+        <form method="get" action="{% url 'analyze_stock' ticker %}">
+            <div class="row mb-4">
+                <div class="col-md-5">
+                    <label for="start_date">Start Date:</label>
+                    {{ form.start_date }}
+                </div>
+                <div class="col-md-5">
+                    <label for="end_date">End Date:</label>
+                    {{ form.end_date }}
+                </div>
+                <div class="col-md-2 mt-4">
+                    <button type="submit" class="btn btn-primary mt-1">Update</button>
+                </div>
+            </div>
+        </form>
+    
+    
+    <div class="container mt-4">
+        <h3>Chart 1: Analyze Interactive Chart: {{ ticker }}</h3>
+        
+        <!-- Display the Plotly chart -->
+        <div>
+            {{ chart_html|safe }}
+        </div>
+        
+        <!-- Add more analysis or charts as needed -->
+     <!-- Display the pie chart -->
+    <div>
+        <h3>Chart 2: Trend Distribution for {{ ticker }}</h3>
+        <img src="data:image/png;base64,{{ trend_chart }}" alt="Trend Distribution Pie Chart">
+    </div>
+    <div>
+            <h3>Chart 3: Candlestick Chart</h3>
+            {{ candlestick_chart_html|safe }}
+        </div>
+    <div>
+            <h3>Chart 4: Histobgram of Daily Returns</h3>
+            {{ histogram_chart|safe }}
+        </div>
+    </div>
+{% endblock %}

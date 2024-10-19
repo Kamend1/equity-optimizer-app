@@ -1,0 +1,21 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Portfolio Detail{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ portfolio.name }}</h2>
+    <p>{{ portfolio.description }}</p>
+    <h4>Total Value: ${{ portfolio_value }}</h4>
+    
+    <h5>Stocks in Portfolio:</h5>
+    <ul class="list-group">
+        {% for portfolio_stock in portfolio.portfoliostock_set.all %}
+            <li class="list-group-item">
+                {{ portfolio_stock.stock.name }} - {{ portfolio_stock.quantity }} shares
+                (Current Price: ${{ portfolio_stock.stock.current_price }})
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

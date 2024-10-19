@@ -1,0 +1,20 @@
+{% extends 'common/base.html' %}
+
+{% block content %}
+    <h1>Add Stock</h1>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <label for="ticker">Ticker Symbol:</label>
+        <input type="text" id="ticker" name="ticker" value="{{ ticker }}" required>
+        <button type="submit">Add Stock</button>
+    </form>
+{% endblock %}

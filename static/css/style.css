@@ -1,0 +1,16 @@
+/* In a custom CSS file or inside <style> tags */
+.card {
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-footer {
+    border-top: 1px solid #dee2e6;
+}
+
+.form-label {
+    font-weight: bold;
+}

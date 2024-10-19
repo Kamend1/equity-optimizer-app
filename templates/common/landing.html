@@ -1,0 +1,13 @@
+<!-- templates/landing.html -->
+{% extends 'common/base.html' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<div class="jumbotron text-center">
+    <h1>Welcome to the Stock Portfolio App</h1>
+    <p>To start analyzing and optimizing your stock portfolio, please log in or register.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Login</a>
+    <a class="btn btn-secondary btn-lg" href="{% url 'register' %}" role="button">Register</a>
+</div>
+{% endblock %}

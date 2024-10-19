@@ -1,0 +1,37 @@
+{% extends 'common/base.html' %}
+{% load custom_tags %}
+{% block title %}Stock Selection{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Select Stocks</h2>
+
+    <form method="post" action="{% url 'simulation' %}">
+        {% csrf_token %}
+
+        {% if stock_form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ stock_form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="form-row">
+            {% for field in stock_form %}
+                <div class="form-group col-md-6">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field|add_class:"form-control" }}
+                    {% if field.errors %}
+                        <div class="text-danger">
+                            {% for error in field.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" name="submit_stocks" class="btn btn-primary">Submit Stocks</button>
+    </form>
+</div>
+{% endblock %}

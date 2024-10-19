@@ -1,0 +1,90 @@
+<!-- simulation.html -->
+{% extends 'common/base.html' %}
+{% load custom_tags %}
+{% block title %}Simulation{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Monte Carlo Simulation</h2>
+    <p class="lead">Run simulations to forecast the performance of your stock portfolio.</p>
+
+    <form method="post" action="{% url 'simulation' %}">
+        {% csrf_token %}
+        
+        <div class="card p-4">
+            <div class="card-header">
+                <h5 class="mb-0">Initial Setup</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    {{ initial_form.start_date.label_tag }} 
+                    {{ initial_form.start_date|add_class:"form-control" }}
+                    {% if initial_form.start_date.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.start_date.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ initial_form.end_date.label_tag }} 
+                    {{ initial_form.end_date|add_class:"form-control" }}
+                    {% if initial_form.end_date.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.end_date.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ initial_form.risk_free_rate.label_tag }}
+                    {{ initial_form.risk_free_rate|add_class:"form-control" }}
+                    {% if initial_form.risk_free_rate.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.risk_free_rate.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ initial_form.num_stocks.label_tag }}
+                    {{ initial_form.num_stocks|add_class:"form-control" }}
+                    {% if initial_form.num_stocks.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.num_stocks.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ initial_form.initial_investment.label_tag }}
+                    {{ initial_form.initial_investment|add_class:"form-control" }}
+                    {% if initial_form.initial_investment.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.initial_investment.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ initial_form.sim_runs.label_tag }}
+                    {{ initial_form.sim_runs|add_class:"form-control" }}
+                    {% if initial_form.sim_runs.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.sim_runs.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <button type="submit" name="submit_initial" class="btn btn-primary">Submit Initial Form</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

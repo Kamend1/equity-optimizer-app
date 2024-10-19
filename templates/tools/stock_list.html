@@ -1,0 +1,157 @@
+6{% extends 'common/base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% block title %}Stock List{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4 text-center">Stock List</h1>
+
+            <!-- Add Stock Button -->
+            <div class="d-flex justify-content-center mb-4">
+                <a href="{% url 'add_stock' %}" class="btn btn-success btn-lg">Add Stock</a>
+            </div>
+
+            <!-- Search Form -->
+            <form method="get" action="{% url 'stock_list' %}" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search stocks...">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    {% if query %}
+                        <a href="{% url 'stock_list' %}" class="btn btn-secondary ms-2">Clear Search</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <!-- Sorting Options -->
+            <form method="get" action="{% url 'stock_list' %}" class="mb-4">
+                <div class="input-group">
+                    <select name="sort" class="form-select">
+                        <option value="">Sort By</option>
+                        <option value="name" {% if sort == 'name' %}selected{% endif %}>Name</option>
+                        <option value="sector" {% if sort == 'sector' %}selected{% endif %}>Sector</option>
+                        <option value="market_cap" {% if sort == 'market_cap' %}selected{% endif %}>Market Cap</option>
+                        <option value="price_to_book" {% if sort == 'price_to_book' %}selected{% endif %}>Price to Book</option>
+                        <option value="revenue" {% if sort == 'revenue' %}selected{% endif %}>Revenue</option>
+                        <option value="ebitda" {% if sort == 'ebitda' %}selected{% endif %}>EBITDA</option>
+                        <option value="dividend_yield" {% if sort == 'dividend_yield' %}selected{% endif %}>Dividend Yield</option>
+                        <option value="beta" {% if sort == 'beta' %}selected{% endif %}>Beta</option>
+                        <option value="trailing_pe" {% if sort == 'trailing_pe' %}selected{% endif %}>Trailing PE</option>
+                        <option value="forward_pe" {% if sort == 'forward_pe' %}selected{% endif %}>Forward PE</option>
+                        <option value="fifty_two_week_high" {% if sort == 'fifty_two_week_high' %}selected{% endif %}>52-Week High</option>
+                        <option value="fifty_two_week_low" {% if sort == 'fifty_two_week_low' %}selected{% endif %}>52-Week Low</option>
+                    </select>
+                
+                    <!-- Direction Toggle -->
+                <select name="direction" class="form-select ms-2">
+                    <option value="asc" {% if direction == 'asc' %}selected{% endif %}>Ascending</option>
+                    <option value="desc" {% if direction == 'desc' %}selected{% endif %}>Descending</option>
+                </select>
+                    <button type="submit" class="btn btn-secondary">Sort</button>
+                </div>
+            </form>
+
+              <!-- Stock List Table -->
+            {% if stocks %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Name</th>
+                                <th>Sector</th>
+                                <!-- Combine Market Cap and Revenue -->
+                                <th class="d-none d-md-table-cell">Financials (Market Cap / Revenue)</th>
+                                <!-- Combine Price Ratios -->
+                                <th class="d-none d-md-table-cell">Price Ratios (P/B / PE)</th>
+                                <!-- Combine Performance Metrics -->
+                                <th class="d-none d-lg-table-cell">Performance (Beta / 52-Week High / Low)</th>
+                                <!-- EBITDA and Dividend can stay, hide on small screens -->
+                                <th class="d-none d-lg-table-cell">EBITDA</th>
+                                <th class="d-none d-lg-table-cell">Dividend Yield</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stock in stocks %}
+                                <tr>
+                                    <td><a href="{% url 'stock_detail' stock.ticker %}">{{ stock.ticker }}</a></td>
+                                    <td>{{ stock.name }}</td>
+                                    <td>{{ stock.sector }}</td>
+                                    
+                                    <!-- Market Cap and Revenue -->
+                                    <td class="d-none d-md-table-cell">
+                                        {{ stock.market_cap|intcomma }} / {{ stock.revenue|intcomma }}
+                                    </td>
+
+                                    <!-- Price Ratios: Price to Book and PE (Trailing) -->
+                                    <td class="d-none d-md-table-cell">
+                                        P/B: {{ stock.price_to_book|floatformat:2 }} <br>
+                                        PE: {{ stock.trailing_pe|floatformat:2 }}
+                                    </td>
+
+                                    <!-- Performance Metrics: Beta, 52-Week High/Low -->
+                                    <td class="d-none d-lg-table-cell">
+                                        Beta: {{ stock.beta|floatformat:2 }} <br>
+                                        High: {{ stock.fifty_two_week_high|floatformat:2 }} <br>
+                                        Low: {{ stock.fifty_two_week_low|floatformat:2 }}
+                                    </td>
+
+                                    <!-- EBITDA and Dividend Yield -->
+                                    <td class="d-none d-lg-table-cell">{{ stock.ebitda|intcomma }}</td>
+                                    <td class="d-none d-lg-table-cell">{{ stock.dividend_yield|multiply:100|floatformat:2 }}%</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning text-center" role="alert">
+                    No stocks found based on your search criteria.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

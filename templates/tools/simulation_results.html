@@ -1,0 +1,54 @@
+{% extends 'common/base.html' %}
+{% load humanize %}
+{% block title %}Simulation Results{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Simulation Results</h2>
+    <p>Below are the results from the Monte Carlo simulation.</p>
+
+    <!-- Display the best portfolio data -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title">Most Optimal Portfolio</h3>
+            <p><strong>Volatility:</strong> {{ best_portfolio_data.Volatility|floatformat:2 }}</p>
+            <p><strong>Expected Portfolio Return:</strong> {{ best_portfolio_data.Portfolio_Return|floatformat:2 }}%</p>
+            <p><strong>Sharpe Ratio:</strong> {{ best_portfolio_data.Sharpe_Ratio|floatformat:2 }}</p>
+            <p><strong>Final Portfolio Value:</strong> ${{ best_portfolio_data.Final_Value|floatformat:2|intcomma }}</p>
+            <p><strong>Return on Investment:</strong> {{ best_portfolio_data.Return_on_Investment|floatformat:2 }}%</p>
+            <p><strong>Portfolio Weights:</strong></p>
+            <ul>
+                {% for weight, ticker in best_portfolio_data.Weights %}
+                    <li>{{ ticker }}: {{ weight  }}%</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+            <form action="{% url 'save_portfolio' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Save Portfolio</button>
+            </form>
+
+    <!-- Render the four figures from the simulation -->
+    <div>
+        <h3>Volatility vs Portfolio Return</h3>
+        <div>{{ fig1_html|safe }}</div>
+    </div>
+
+    <div>
+        <h3>Volatility over Simulations</h3>
+        <div>{{ fig2_html|safe }}</div>
+    </div>
+
+    <div>
+        <h3>Portfolio Return over Simulations</h3>
+        <div>{{ fig3_html|safe }}</div>
+    </div>
+
+    <div>
+        <h3>Sharpe Ratio over Simulations</h3>
+        <div>{{ fig4_html|safe }}</div>
+    </div>
+</div>
+{% endblock %}
