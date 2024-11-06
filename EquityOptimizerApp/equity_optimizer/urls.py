@@ -2,8 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('simulation/', views.simulation, name='simulation'),  # Simulation page
-    path('add/', views.add_stock, name='add_stock'),  # Add stock page
+    path('simulation/', views.simulation, name='simulation'),
+    path('add/', views.add_stock, name='add_stock'),
     path('analyze/<str:ticker>/', views.analyze_stock, name='analyze_stock'),
     path('stocks/', views.StockListView.as_view(), name='stock_list'),
     path('stocks/<str:ticker>/', views.stock_detail, name='stock_detail'),

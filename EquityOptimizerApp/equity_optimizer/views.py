@@ -216,7 +216,7 @@ def analyze_stock(request, ticker):
     return render(request, 'tools/analyze.html', context)
 
 
-class StockListView(LoginRequiredMixin, ListView):
+class StockListView(ListView):
     model = Stock
     template_name = 'tools/stock_list.html'
     context_object_name = 'stocks'
@@ -247,29 +247,6 @@ class StockListView(LoginRequiredMixin, ListView):
         return queryset.prefetch_related('historical_data')
 
 
-# @login_required
-# def stock_list(request):
-#     stocks = Stock.objects.all().order_by('ticker')
-#
-#     # Apply search or sort if needed
-#     query = request.GET.get('q', '')
-#     sort = request.GET.get('sort', '')
-#
-#     if query:
-#         stocks = get_filtered_stocks(query)
-#
-#     if sort:
-#         stocks = stocks.order_by(sort)
-#
-#     context = {
-#         'stocks': stocks,
-#         'query': query,
-#         'sort': sort,
-#     }
-#     return render(request, 'tools/stock_list.html', context)
-
-
-@login_required
 def stock_detail(request, ticker):
     try:
         stock = get_stock_by_ticker(ticker)
@@ -279,7 +256,7 @@ def stock_detail(request, ticker):
     return render(request, 'tools/stock_detail.html', {'stock': stock})
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def update_stocks_view(request):
     if request.method == 'POST':
         try:

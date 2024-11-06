@@ -1,13 +1,20 @@
-<!-- templates/landing.html -->
 {% extends 'common/base.html' %}
 
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
-<div class="jumbotron text-center">
-    <h1>Welcome to the Stock Portfolio App</h1>
-    <p>To start analyzing and optimizing your stock portfolio, please log in or register.</p>
-    <a class="btn btn-primary btn-lg" href="{% url 'login' %}" role="button">Login</a>
-    <a class="btn btn-secondary btn-lg" href="{% url 'register' %}" role="button">Register</a>
-</div>
+    
+    <div class="jumbotron jumbotron-fluid bg-light text-center py-5 mb-0">
+        <div class="container">
+            <h1 class="display-4 text-primary font-weight-bold mb-3">Welcome to the Stock Portfolio App</h1>
+            <p class="lead mb-4 text-muted">Start analyzing and optimizing your dream stock portfolios with ease. Log in or register to gain full access.</p>
+            <p class="text-muted mb-4">You can view currently available stock data without registration.</p>
+            
+            <div class="d-flex justify-content-center flex-column flex-sm-row">
+                <a class="btn btn-primary btn-lg mx-2 mb-3 mb-sm-0" href="{% url 'login' %}" role="button">Login</a>
+                <a class="btn btn-outline-primary btn-lg mx-2 mb-3 mb-sm-0" href="{% url 'register' %}" role="button">Register</a>
+                <a class="btn btn-outline-secondary btn-lg mx-2" href="{% url 'stock_list' %}" role="button">View Stocks</a>
+            </div>
+        </div>
+    </div>
 {% endblock %}

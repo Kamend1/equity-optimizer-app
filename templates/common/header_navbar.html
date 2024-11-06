@@ -5,7 +5,7 @@
         <a class="navbar-brand" href="{% url 'landing' %}">
             <!-- Site Logo -->
             <img src="{% static 'images/logo.png' %}" alt="Site Logo" style="height: 40px;">
-            <span class="ml-2">Stock Portfolio</span>
+            <span class="ml-2">Stock Portfolio App Home</span>
         </a>
 
         <!-- Superuser "Update Stocks" Button -->
@@ -22,13 +22,14 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'about' %}">About</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'stock_list' %}">Stocks</a>
+                </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'stock_list' %}">My Stocks</a>
-                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'portfolio' %}">Portfolio</a>
                     </li>
