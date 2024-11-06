@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
 
+from EquityOptimizerApp.register.models import Profile, InvestorLevelChoices
+
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(
@@ -48,3 +50,35 @@ class CustomAuthenticationForm(AuthenticationForm):
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
             'password': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
         }
+
+
+class BaseProfileForm(forms.ModelForm):
+    username = forms.CharField(max_length=150)
+    first_name = forms.CharField(max_length=30)
+    last_name = forms.CharField(max_length=30)
+    email = forms.EmailField()
+
+    profile_image = forms.URLField(required=False)
+    profile_link = forms.URLField(required=False)
+    age = forms.IntegerField(required=False)
+    investor_level = forms.ChoiceField(choices=InvestorLevelChoices.choices, required=False)
+    bio = forms.CharField(widget=forms.Textarea, required=False)
+
+    class Meta:
+        model = Profile
+        fields = ['profile_image', 'profile_link', 'age', 'investor_level', 'bio']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.get('user')
+        super().__init__(*args, **kwargs)
+
+        # Prepopulate the form with the User data
+        if user:
+            self.fields['username'].initial = user.username
+            self.fields['first_name'].initial = user.first_name
+            self.fields['last_name'].initial = user.last_name
+            self.fields['email'].initial = user.email
+
+
+class ProfileEditForm(BaseProfileForm):
+    pass

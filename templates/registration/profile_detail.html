@@ -1,0 +1,60 @@
+{% extends 'common/base.html' %}
+{% load static %}
+{% block title %}Profile Details{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg rounded-lg">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4">{{ user.get_full_name }}</h2>
+
+                        <div class="text-center mb-4">
+                            {% if not profile.profile_image %}
+                                <img src="{% static 'images/no_profile_pic.jfif' %}" 
+                                     alt="Profile Image" 
+                                     class="img-fluid rounded-circle"
+                                     style="max-width: 150px; height: 150px;">
+                            {% else %}
+                                <img src="{{ profile.profile_image }}" 
+                                     alt="Profile Image" 
+                                     class="img-fluid rounded-circle"
+                                     style="max-width: 150px; height: 150px;">
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <p><strong>Username:</strong> <span>{{ user.username }}</span></p>
+                        </div>
+
+                        <div class="mb-3">
+                            <p><strong>Email:</strong> <span>{{ user.email }}</span></p>
+                        </div>
+
+                        <div class="mb-3">
+                            <p><strong>Profile Link:</strong> 
+                               <a href="{{ profile.profile_link }}" target="_blank">{{ profile.profile_link }}</a>
+                            </p>
+                        </div>
+
+                        <div class="mb-3">
+                            <p><strong>Age:</strong> <span>{{ profile.age }}</span></p>
+                        </div>
+
+                        <div class="mb-3">
+                            <p><strong>Investor Level:</strong> <span>{{ profile.get_investor_level_display }}</span></p>
+                        </div>
+
+                        <div class="mb-4">
+                            <p><strong>Bio:</strong> <span>{{ profile.bio }}</span></p>
+                        </div>
+
+                        <a class="btn btn-primary btn-lg btn-block" href="{% url 'profile-edit' %}">Edit Profile</a>
+                        <a class="btn btn-primary btn-lg btn-block" href="{% url 'password_change' %}">Change Password</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
