@@ -13,7 +13,6 @@ def show_nav(context):
     landing_url = reverse('landing')
     register_url = reverse('register')
 
-    # Check if the current path contains any of these URLs
     return not any(url in path for url in [landing_url, login_url, logout_url, register_url])
 
 
@@ -21,4 +20,4 @@ def show_nav(context):
 def add_class(value, css_class):
     if isinstance(value, BoundField):
         return value.as_widget(attrs={'class': css_class})
-    return value  # Return the value unchanged if it's not a BoundField
+    return value

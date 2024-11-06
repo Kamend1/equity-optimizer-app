@@ -79,6 +79,10 @@ def simulation(request):
 
                 try:
                     close_price_df = fetch_stock_data(stock_symbols, start_date=start_date, end_date=end_date)
+                    print(close_price_df)
+                    print(f"Stock price data summary:\n{close_price_df.describe()}")
+
+
                 except Exception as e:
                     messages.error(request, f"Failed to fetch stock data: {str(e)}")
                     return render(request, 'tools/stock_selection.html',
@@ -227,7 +231,7 @@ class StockListView(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().order_by('ticker')
         query = self.request.GET.get('q', '')
         sort = self.request.GET.get('sort', '')
         direction = self.request.GET.get('direction', 'asc')

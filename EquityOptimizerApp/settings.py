@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+
+    "widget_tweaks",
+
     'EquityOptimizerApp.equity_optimizer',
     'EquityOptimizerApp.portfolio',
     'EquityOptimizerApp.common',
@@ -163,3 +166,5 @@ DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 CONTACT_EMAIL = config('EMAIL_HOST_USER')
 
 SESSION_COOKIE_AGE = 3600
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True

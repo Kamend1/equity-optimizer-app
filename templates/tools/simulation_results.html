@@ -1,5 +1,6 @@
 {% extends 'common/base.html' %}
 {% load humanize %}
+{% load custom_filters %}
 {% block title %}Simulation Results{% endblock %}
 
 {% block content %}
@@ -12,7 +13,7 @@
         <div class="card-body">
             <h3 class="card-title">Most Optimal Portfolio</h3>
             <p><strong>Volatility:</strong> {{ best_portfolio_data.Volatility|floatformat:2 }}</p>
-            <p><strong>Expected Portfolio Return:</strong> {{ best_portfolio_data.Portfolio_Return|floatformat:2 }}%</p>
+            <p><strong>Expected Portfolio Return:</strong> {{ best_portfolio_data.Portfolio_Return|multiply:100|floatformat:2 }}%</p>
             <p><strong>Sharpe Ratio:</strong> {{ best_portfolio_data.Sharpe_Ratio|floatformat:2 }}</p>
             <p><strong>Final Portfolio Value:</strong> ${{ best_portfolio_data.Final_Value|floatformat:2|intcomma }}</p>
             <p><strong>Return on Investment:</strong> {{ best_portfolio_data.Return_on_Investment|floatformat:2 }}%</p>

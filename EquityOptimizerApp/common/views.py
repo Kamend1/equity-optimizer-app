@@ -19,7 +19,6 @@ def home(request):
     return render(request, 'common/home.html')
 
 
-@login_required
 def about(request):
     return render(request, 'common/about.html')
 

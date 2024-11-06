@@ -1,9 +1,8 @@
-from django.core.validators import MinLengthValidator
 from django.db import models
 from django.db.models import Index
 from django.contrib.auth.models import User
-from .mixins import CreatedAtMixin, UpdatedAtMixin
-from .managers import StockDataManager, StockManager, PortfolioManager
+from EquityOptimizerApp.mixins import CreatedAtMixin, UpdatedAtMixin
+from .managers import StockDataManager, StockManager
 
 
 # Create your models here.

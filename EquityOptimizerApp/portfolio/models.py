@@ -1,7 +1,7 @@
 from django.core.validators import MinLengthValidator
 from django.db import models
 from django.utils import timezone
-from EquityOptimizerApp.equity_optimizer.mixins import CreatedAtMixin, UpdatedAtMixin
+from EquityOptimizerApp.mixins import CreatedAtMixin, UpdatedAtMixin
 from EquityOptimizerApp.equity_optimizer.managers import PortfolioManager
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError

@@ -16,14 +16,22 @@ class CustomLoginForm(AuthenticationForm):
 
 
 class CustomUserCreationForm(UserCreationForm):
-    first_name = forms.CharField(max_length=30, required=True, label='First Name')
-    last_name = forms.CharField(max_length=30, required=True, label='Last Name')
-    email = forms.EmailField(required=True, label='Email')
-    terms_and_conditions = forms.BooleanField(required=True, label='I agree to the Terms and Conditions')
+    first_name = forms.CharField(max_length=30, required=True, label='First Name:')
+    last_name = forms.CharField(max_length=30, required=True, label='Last Name:')
+    email = forms.EmailField(required=True, label='Email:')
+    terms_and_conditions = forms.BooleanField(required=True, label='I agree to the Terms and Conditions:')
 
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+        labels = {
+            'username': 'Username:',
+            'first_name': 'First Name:',
+            'last_name': 'Last Name:',
+            'email': 'Email:',
+            'password1': "Password:",
+            'password2': "Confirm Password:",
+        }
 
     def clean_terms_and_conditions(self):
         terms = self.cleaned_data.get('terms_and_conditions')
