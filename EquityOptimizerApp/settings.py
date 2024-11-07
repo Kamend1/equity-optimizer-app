@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'EquityOptimizerApp.portfolio',
     'EquityOptimizerApp.common',
     'EquityOptimizerApp.register',
+    'EquityOptimizerApp.user_stock_lists'
 ]
 
 MIDDLEWARE = [
@@ -60,10 +61,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'EquityOptimizerApp.urls'
-
-LOGOUT_REDIRECT_URL = '/'
-LOGIN_REDIRECT_URL = '/home/'
-LOGIN_URL = '/login'
 
 TEMPLATES = [
     {
@@ -168,3 +165,7 @@ CONTACT_EMAIL = config('EMAIL_HOST_USER')
 SESSION_COOKIE_AGE = 3600
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
+
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/home/'
+LOGIN_URL = '/login'

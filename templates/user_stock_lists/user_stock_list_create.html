@@ -1,0 +1,73 @@
+{% extends 'common/base.html' %}
+
+{% block content %}
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card shadow-lg rounded-lg">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4">Create Favorite Stock List</h2>
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <!-- Render form fields with custom labels, placeholders, and help texts -->
+                            {{ form.as_p }}
+
+                            <!-- Stocks Selection Field -->
+                            <div class="form-group mb-3">
+                                <label for="stocks" class="form-label">Select Stocks:</label>
+                                <select id="stocks" name="stocks" multiple="multiple" class="form-control"></select>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary btn-block">Save List</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include Select2 JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <!-- Include Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet"/>
+
+    <script>
+        $(document).ready(function () {
+            $('#stocks').select2({
+                ajax: {
+                    url: "{% url 'stock_search' %}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {q: params.term};
+                    },
+                    processResults: function (data) {
+                        return {results: data.results};
+                    },
+                    cache: true
+                },
+                minimumInputLength: 2,
+                multiple: true
+            });
+
+            $('#stocks').on('select2:select select2:unselect', function (e) {
+                let selectedStocks = $(this).val() || [];  // Get selected values or empty array
+                $('#stocks').next('.error-message').remove(); // Remove previous error message
+                if (selectedStocks.length < 5 || selectedStocks.length > 50) {
+                    let message = selectedStocks.length < 5
+                        ? "Please select at least 5 stocks."
+                        : "You can only select up to 50 stocks.";
+                    $('<span class="error-message text-danger d-block mt-2">' + message + '</span>')
+                        .insertAfter($('#stocks'));
+                }
+            });
+        });
+    </script>
+{% endblock %}

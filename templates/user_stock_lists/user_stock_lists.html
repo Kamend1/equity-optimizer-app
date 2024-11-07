@@ -1,0 +1,56 @@
+{% extends 'common/base.html' %}
+
+{% block title %}My Favorite Stock Lists{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <h2 class="text-center mb-4">My Favorite Stock Lists</h2>
+
+        <!-- Button to create a new stock list -->
+        <div class="text-right mb-4">
+            <a href="{% url 'create_list' %}" class="btn btn-success">Create New List</a>
+        </div>
+
+        <!-- Check if there are any stock lists -->
+        {% if object_list %}
+            <div class="row">
+                {% for stock_list in object_list %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow rounded-lg h-100">
+                            <div class="card-body">
+                                <!-- List Name and Delete Button -->
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">{{ stock_list.name }}</h5>
+                                    <a href="{% url 'delete-list' stock_list.pk %}" class="btn btn-danger btn-sm" title="Delete List">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+
+                                <!-- Description Snippet (first five words) -->
+                                <p class="card-text text-muted">
+                                    {{ stock_list.description|truncatewords:5 }}...
+                                </p>
+
+                                <!-- Stylized list of stocks with clickable links -->
+                                <ul class="list-unstyled">
+                                    {% for stock in stock_list.stocks.all %}
+                                        <li>
+                                            <a href="{% url 'stock_detail' stock.ticker %}" class="text-decoration-none">
+                                                <span class="badge badge-primary">{{ stock.ticker }}</span>
+                                                {{ stock.name }}
+                                            </a>
+                                        </li>
+                                    {% empty %}
+                                        <li class="text-muted">No stocks added</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-muted">You don't have any favorite stock lists yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}
