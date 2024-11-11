@@ -18,12 +18,19 @@
                     <div class="col-md-6 mb-4">
                         <div class="card shadow rounded-lg h-100">
                             <div class="card-body">
-                                <!-- List Name and Delete Button -->
+                                <!-- List Name and Action Buttons (Edit & Delete) -->
                                 <div class="d-flex justify-content-between align-items-center">
                                     <h5 class="card-title">{{ stock_list.name }}</h5>
-                                    <a href="{% url 'delete-list' stock_list.pk %}" class="btn btn-danger btn-sm" title="Delete List">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
+                                    <div>
+                                        <!-- Edit Button -->
+                                        <a href="{% url 'edit-list' stock_list.pk %}" class="btn btn-success btn-sm mr-2" title="Edit List">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <!-- Delete Button -->
+                                        <a href="{% url 'delete-list' stock_list.pk %}" class="btn btn-danger btn-sm" title="Delete List">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
                                 </div>
 
                                 <!-- Description Snippet (first five words) -->

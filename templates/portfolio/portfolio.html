@@ -1,27 +1,35 @@
 {% extends 'common/base.html' %}
 
-{% block title %}Portfolio{% endblock %}
+{% block title %}Your Portfolios{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Your Portfolios</h2>
-    <h3>Here you will find details about your portfolios, including stocks, indices, and their performance.</h3>
-    
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Your Portfolios</h2>
+    <p class="text-center text-muted mb-5">Here you will find details about your portfolios, including stocks, indices, and their performance.</p>
+
     {% if has_portfolios %}
-        <div class="list-group">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for portfolio in user_portfolios %}
-                <a href="{% url 'portfolio_detail' portfolio.id %}" class="list-group-item list-group-item-action">
-                    <h5 class="mb-1">{{ portfolio.name }}</h5>
-                    <p class="mb-1">{{ portfolio.description }}</p>
-                    <small>Created on {{ portfolio.created_at }}</small>
-                </a>
+                <div class="col">
+                    <!-- Portfolio Card -->
+                    <div class="card h-100 shadow-sm rounded-lg">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ portfolio.name }}</h5>
+                            <p class="card-text">{{ portfolio.description }}</p>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <small>Created on {{ portfolio.created_at }}</small>
+                        </div>
+                        <!-- Link to Portfolio Detail -->
+                        <a href="{% url 'portfolio_detail' portfolio.id %}" class="stretched-link"></a>
+                    </div>
+                </div>
             {% endfor %}
         </div>
     {% else %}
-        <div class="alert alert-info" role="alert">
+        <div class="alert alert-info text-center" role="alert">
             You currently don't have any portfolios. Create a new portfolio to get started!
         </div>
     {% endif %}
 </div>
 {% endblock %}
-

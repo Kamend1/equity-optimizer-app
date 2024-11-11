@@ -1,0 +1,57 @@
+{% extends 'common/base.html' %}
+
+{% block content %}
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Edit Favorite Stock List</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <!-- Preload existing stocks in the selection field -->
+            <div class="form-group mb-3">
+                <label for="stocks" class="form-label">Select Stocks:</label>
+                <select id="stocks" name="stocks" multiple="multiple" class="form-control">
+                    {% for stock in selected_stocks %}
+                        <option value="{{ stock.id }}" selected>{{ stock.text }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Update List</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet"/>
+
+    <script>
+        $(document).ready(function () {
+            const preselectedStocks = {{ selected_stocks|safe }};
+
+            $('#stocks').select2({
+                ajax: {
+                    url: "{% url 'stock_search' %}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {q: params.term};
+                    },
+                    processResults: function (data) {
+                        return {results: data.results};
+                    },
+                    cache: true
+                },
+                minimumInputLength: 2,
+                multiple: true
+            });
+
+            // Preselect existing stocks with ticker and name
+            preselectedStocks.forEach(function (stock) {
+                const option = new Option(stock.text, stock.id, true, true);
+                $('#stocks').append(option).trigger('change');
+            });
+        });
+    </script>
+{% endblock %}

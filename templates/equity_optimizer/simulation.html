@@ -1,0 +1,178 @@
+{% extends 'common/base.html' %}
+{% load custom_tags %}
+{% block title %}Monte Carlo Simulation{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Monte Carlo Simulation</h2>
+    <p class="lead text-center">Run simulations to forecast the performance of your stock portfolio using your favorite stock lists.</p>
+
+    <!-- Simulation Form -->
+    <form id="simulationForm" method="post" action="{% url 'simulation' %}">
+        {% csrf_token %}
+
+        <!-- Card container with shadow and rounded edges -->
+        <div class="card p-4 shadow-lg rounded-lg">
+            <div class="card-header bg-primary text-white rounded-top">
+                <h5 class="mb-0">Initial Setup</h5>
+            </div>
+            <div class="card-body">
+                <!-- Form Fields with existing styling -->
+                <div class="mb-3">
+                    {{ initial_form.start_date.label_tag }}
+                    {{ initial_form.start_date|add_class:"form-control" }}
+                    {% if initial_form.start_date.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.start_date.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ initial_form.end_date.label_tag }}
+                    {{ initial_form.end_date|add_class:"form-control" }}
+                    {% if initial_form.end_date.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.end_date.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ initial_form.risk_free_rate.label_tag }}
+                    {{ initial_form.risk_free_rate|add_class:"form-control" }}
+                    {% if initial_form.risk_free_rate.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.risk_free_rate.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ initial_form.initial_investment.label_tag }}
+                    {{ initial_form.initial_investment|add_class:"form-control" }}
+                    {% if initial_form.initial_investment.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.initial_investment.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ initial_form.sim_runs.label_tag }}
+                    {{ initial_form.sim_runs|add_class:"form-control" }}
+                    {% if initial_form.sim_runs.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.sim_runs.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ initial_form.favorite_list.label_tag }}
+                    {{ initial_form.favorite_list|add_class:"form-control" }}
+                    {% if initial_form.favorite_list.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in initial_form.favorite_list.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Choose one of your existing favorite stock lists for the simulation.</small>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-block rounded-pill">
+                        <i class="fas fa-chart-line"></i> Run Simulation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Progress Bar -->
+    <div id="progressContainer" class="mt-5" style="display: none;">
+        <div class="card p-3 shadow-sm rounded-lg">
+            <div class="progress mb-4">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 0%;"></div>
+            </div>
+            <p id="progressText" class="text-center mt-2">Progress: 0% (Run 0/0)</p>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="text-center mt-5 mb-5" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Running...</span>
+        </div>
+    </div>
+</div>
+
+<!-- Include jQuery (if not already included) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#simulationForm').on('submit', function (e) {
+            e.preventDefault();
+
+            // Show progress bar and spinner, and scroll to them
+            $('#progressContainer').show();
+            $('#loadingSpinner').show();
+            $('#progressBar').css('width', '0%');
+            $('#progressText').text('Progress: 0% (Run 0/0)');
+            $('html, body').animate({
+                scrollTop: $('#progressContainer').offset().top - 20
+            }, 500);
+
+            // Disable the submit button
+            $(this).find('button[type="submit"]').prop('disabled', true);
+
+            // Start the form submission
+            this.submit();
+
+            // Poll the progress every second
+            const interval = setInterval(function () {
+                $.ajax({
+                    url: "{% url 'get_progress' %}",
+                    type: 'GET',
+                    success: function (data) {
+                        const current = data.current;
+                        const total = data.total;
+                        const progress = Math.floor((current / total) * 100);
+
+                        // Update the progress bar and text
+                        $('#progressBar').css('width', progress + '%');
+                        $('#progressText').text(`Progress: ${progress}% (Run ${current}/${total})`);
+
+                        // Stop polling when progress is complete
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            $('#loadingSpinner').hide();
+                            $('#progressText').text('Simulation complete!');
+                        }
+                    },
+                    error: function () {
+                        clearInterval(interval);
+                        $('#progressText').text('Error retrieving progress.');
+                    }
+                });
+            }, 2000);
+        });
+    });
+</script>
+
+<!-- Include FontAwesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

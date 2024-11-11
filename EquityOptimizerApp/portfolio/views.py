@@ -19,7 +19,7 @@ def portfolio(request):
         'has_portfolios': has_portfolios,
     }
 
-    return render(request, 'tools/../../templates/portfolio/portfolio.html', context)
+    return render(request, 'equity_optimizer/../../templates/portfolio/portfolio.html', context)
 
 
 @login_required
@@ -61,11 +61,11 @@ def save_portfolio_view(request):
                 return redirect('simulation')  # Return a redirect in case of an exception
         else:
             messages.error(request, "Invalid form submission.")
-            return render(request, 'tools/../../templates/portfolio/save_portfolio.html', {'portfolio_form': portfolio_form})  # Re-render the form with errors
+            return render(request, 'equity_optimizer/../../templates/portfolio/save_portfolio.html', {'portfolio_form': portfolio_form})  # Re-render the form with errors
 
     else:
         portfolio_form = PortfolioForm()
-        return render(request, 'tools/../../templates/portfolio/save_portfolio.html', {'portfolio_form': portfolio_form})
+        return render(request, 'equity_optimizer/../../templates/portfolio/save_portfolio.html', {'portfolio_form': portfolio_form})
 
 
 # Create your views here.
@@ -79,4 +79,4 @@ def portfolio_detail(request, portfolio_id):
         # 'portfolio_value': portfolio.calculate_value(),
     }
 
-    return render(request, 'tools/../../templates/portfolio/portfolio_detail.html', context)
+    return render(request, 'equity_optimizer/../../templates/portfolio/portfolio_detail.html', context)

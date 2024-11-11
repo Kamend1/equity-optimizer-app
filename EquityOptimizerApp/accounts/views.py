@@ -6,8 +6,8 @@ from django.utils.decorators import method_decorator
 from django.views.generic import FormView, DetailView, UpdateView
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView, PasswordChangeView, PasswordChangeDoneView
 
-from EquityOptimizerApp.register.forms import CustomUserCreationForm, ProfileEditForm
-from EquityOptimizerApp.register.models import Profile
+from EquityOptimizerApp.accounts.forms import CustomUserCreationForm, ProfileEditForm
+from EquityOptimizerApp.accounts.models import Profile
 
 
 # Create your views here.

@@ -1,5 +1,7 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import models
+
+UserModel = get_user_model()
 
 
 # Create your models here.
@@ -16,4 +18,4 @@ class Profile(models.Model):
     age = models.IntegerField(null=True, blank=True)
     investor_level = models.CharField(max_length=30, choices=InvestorLevelChoices.choices, null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(to=UserModel, on_delete=models.CASCADE)

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.forms import UserCreationForm
 
-from EquityOptimizerApp.register.models import Profile, InvestorLevelChoices
+from EquityOptimizerApp.accounts.models import Profile, InvestorLevelChoices
 
 
 class CustomLoginForm(AuthenticationForm):

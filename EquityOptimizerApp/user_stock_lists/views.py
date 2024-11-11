@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, ListView, DeleteView
 from django.http import JsonResponse
@@ -35,13 +37,72 @@ def stock_search(request):
     return JsonResponse({'results': []})
 
 
-class UserListsMain(ListView, LoginRequiredMixin):
+class UserListsMain(ListView, LoginRequiredMixin, UserPassesTestMixin):
     model = FavoriteStockList
     template_name = 'user_stock_lists/user_stock_lists.html'
     context_object_name = 'lists'
+    paginate_by = 9
+
+    def test_func(self):
+        list_id = self.kwargs.get('pk')
+        if list_id is None:
+            return True  # General view access check
+        # Verify that the requested list belongs to the authenticated user
+        return FavoriteStockList.objects.filter(id=list_id, user=self.request.user).exists()
+
+    def get_queryset(self):
+        return self.model.objects.filter(user=self.request.user)
 
 
-class UserListsDeleteView(DeleteView, LoginRequiredMixin):
+class UserListsDeleteView(DeleteView, LoginRequiredMixin, UserPassesTestMixin):
     model = FavoriteStockList
     success_url = reverse_lazy('stock_lists')
     template_name = 'user_stock_lists/user_stock_list_delete.html'
+
+    def test_func(self):
+        favorite_list = get_object_or_404(FavoriteStockList, id=self.kwargs.get('pk'))
+        return favorite_list.user == self.request.user
+
+    def handle_no_permission(self):
+        raise PermissionDenied("You do not have permission to delete this list.")
+
+
+class UserStockListUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = FavoriteStockList
+    form_class = FavoriteStockListForm
+    template_name = 'user_stock_lists/user_stock_list_edit.html'
+    success_url = reverse_lazy('stock_lists')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        response = super().form_valid(form)
+
+        stock_ids = self.request.POST.getlist('stocks')
+        if stock_ids:
+            form.instance.stocks.set(stock_ids)
+        else:
+            form.instance.stocks.clear()
+
+        return response
+
+    def test_func(self):
+        favorite_list = get_object_or_404(FavoriteStockList, id=self.kwargs.get('pk'))
+        return favorite_list.user == self.request.user
+
+    def handle_no_permission(self):
+        raise PermissionDenied("You do not have permission to edit this list.")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['form'].initial['name'] = self.object.name
+        context['form'].initial['description'] = self.object.description
+        context['selected_stocks'] = [
+            {
+                'id': stock.id,
+                'text': f"{stock.ticker} - {stock.name}"
+            }
+            for stock in self.object.stocks.all()
+        ]
+
+        return context

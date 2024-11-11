@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
-
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'EquityOptimizerApp.equity_optimizer',
     'EquityOptimizerApp.portfolio',
     'EquityOptimizerApp.common',
-    'EquityOptimizerApp.register',
+    'EquityOptimizerApp.accounts',
     'EquityOptimizerApp.user_stock_lists'
 ]
 
@@ -166,6 +166,6 @@ SESSION_COOKIE_AGE = 3600
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
 
-LOGOUT_REDIRECT_URL = '/'
-LOGIN_REDIRECT_URL = '/home/'
-LOGIN_URL = '/login'
+LOGOUT_REDIRECT_URL = reverse_lazy('login')
+LOGIN_REDIRECT_URL = reverse_lazy('home')
+LOGIN_URL = reverse_lazy('login')
