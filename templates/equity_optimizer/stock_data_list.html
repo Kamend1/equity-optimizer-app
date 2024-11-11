@@ -1,0 +1,115 @@
+{% extends 'common/base.html' %}
+{% load humanize %}
+
+{% block title %}{{ stock.name }} ({{ stock.ticker }}) - Historical Data{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">{{ stock.name }} ({{ stock.ticker }}) - Historical Data</h2>
+
+        <!-- Date Range Filtering Form -->
+        <div class="card shadow-lg rounded-lg mb-4">
+            <div class="card-body">
+                <h5 class="mb-3 text-center">Filter Historical Data by Date Range</h5>
+                <form method="get" class="row justify-content-center align-items-center">
+                    <div class="col-md-4 mb-3">
+                        <label for="id_start_date" class="form-label">Start Date</label>
+                        <input type="date" id="id_start_date" name="start_date" class="form-control"
+                               value="{{ form.start_date.value }}">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="id_end_date" class="form-label">End Date</label>
+                        <input type="date" id="id_end_date" name="end_date" class="form-control"
+                               value="{{ form.end_date.value }}">
+                    </div>
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter"></i> Apply Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Historical Data Table -->
+        <div class="card shadow-lg rounded-lg">
+            <div class="card-body">
+                {% if stock_data %}
+                    <table class="table table-striped table-hover">
+                        <thead class="table-primary">
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Open</th>
+                            <th scope="col">High</th>
+                            <th scope="col">Low</th>
+                            <th scope="col">Close</th>
+                            <th scope="col">Adj Close</th>
+                            <th scope="col">Volume</th>
+                            <th scope="col">Daily Return</th>
+                            <th scope="col">Trend</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for data in stock_data %}
+                            <tr>
+                                <td>{{ data.date }}</td>
+                                <td>{{ data.open|floatformat:2 }}</td>
+                                <td>{{ data.high|floatformat:2 }}</td>
+                                <td>{{ data.low|floatformat:2 }}</td>
+                                <td>{{ data.close|floatformat:2 }}</td>
+                                <td>{{ data.adj_close|floatformat:2 }}</td>
+                                <td>{{ data.volume|intcomma }}</td>
+                                <td>{{ data.daily_return|floatformat:2 }}%</td>
+                                <td>{{ data.trend }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination Controls -->
+    <div class="d-flex justify-content-center mt-4">
+        {% if is_paginated %}
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        {% endif %}
+    </div>
+                {% else %}
+                    <div class="alert alert-info text-center" role="alert">
+                        No historical data available for the selected date range.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Back to Stock Detail Button -->
+        <div class="text-center mt-3">
+            <a href="{% url 'stock_detail' stock.ticker %}" class="btn btn-secondary btn-lg rounded-pill">
+                <i class="fas fa-arrow-left"></i> Back to Stock Details
+            </a>
+        </div>
+    </div>
+
+    <!-- Include Bootstrap and FontAwesome from CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

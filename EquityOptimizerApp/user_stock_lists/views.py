@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, ListView, DeleteView
@@ -31,7 +32,9 @@ class UserStockListCreateView(LoginRequiredMixin, CreateView):
 def stock_search(request):
     query = request.GET.get('q', '')
     if query:
-        stocks = Stock.objects.filter(name__icontains=query)[:50]  # Limit to 50 results
+        stocks = Stock.objects.filter(
+            Q(ticker__icontains=query) | Q(name__icontains=query)
+        )[:50]
         results = [{'id': stock.id, 'text': f"{stock.ticker} - {stock.name}"} for stock in stocks]
         return JsonResponse({'results': results})
     return JsonResponse({'results': []})

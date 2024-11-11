@@ -1,11 +1,11 @@
 import os
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.contrib import messages
-from .models import Stock
+from .models import Stock, StockData
 from .forms import DateRangeForm, InitialForm
 import pandas as pd
 import json
@@ -121,7 +121,7 @@ def add_stock(request):
     return render(request, 'equity_optimizer/add.html')
 
 
-@login_required
+
 def analyze_stock(request, ticker):
 
     default_start_date = '2012-01-01'
@@ -195,13 +195,17 @@ class StockListView(ListView):
         return queryset.prefetch_related('historical_data')
 
 
-def stock_detail(request, ticker):
-    try:
-        stock = get_stock_by_ticker(ticker)
-    except Stock.DoesNotExist:
-        return render(request, 'equity_optimizer/stock_detail.html', {'error': 'Stock not found'})
+class StockDetailView(DetailView):
+    model = Stock
+    template_name = 'equity_optimizer/stock_detail.html'
+    context_object_name = 'stock'
+    pk_url_kwarg = 'ticker'
+    slug_field = 'ticker'
+    slug_url_kwarg = 'ticker'
 
-    return render(request, 'equity_optimizer/stock_detail.html', {'stock': stock})
+    def get_object(self, queryset=None):
+        # Fetch stock using the ticker field
+        return get_object_or_404(Stock, ticker=self.kwargs.get('ticker'))
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -233,3 +237,31 @@ def get_progress(request):
         progress = {"current": 0, "total": 1}
 
     return JsonResponse(progress)
+
+
+class StockDataListView(ListView):
+    model = StockData
+    template_name = 'equity_optimizer/stock_data_list.html'
+    context_object_name = 'stock_data'
+    paginate_by = 50
+
+    def get_queryset(self):
+        stock = get_object_or_404(Stock, ticker=self.kwargs['ticker'])
+        queryset = StockData.objects.filter(stock=stock).order_by('-date')
+
+        form = DateRangeForm(self.request.GET)
+        if form.is_valid():
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+            if start_date:
+                queryset = queryset.filter(date__gte=start_date)
+            if end_date:
+                queryset = queryset.filter(date__lte=end_date)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = DateRangeForm(self.request.GET)
+        context['stock'] = get_object_or_404(Stock, ticker=self.kwargs['ticker'])
+        return context

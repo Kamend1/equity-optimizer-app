@@ -39,13 +39,11 @@ def add_stock_to_db(ticker):
     if not stock_data:
         raise ValueError("No data returned from yfinance.")
 
-    # Add stock to the Stock model
     stock = Stock.objects.create(
         ticker=ticker,
         name=info.get('shortName', ''),
         sector=info.get('sector', ''),
 
-        # Assigning financial details to the model fields
         market_cap=info.get('marketCap'),
         enterprise_value=info.get('enterpriseValue'),
         trailing_pe=info.get('trailingPE'),
@@ -102,9 +100,6 @@ def download_and_save_stock_data(stock, start_date='2010-01-01', end_date=None):
 
     # Remove rows with NaN values in key columns
     data.replace(np.nan, 0, inplace=True)
-
-    # Optional: Fill NaN values in other columns if needed
-    # data.fillna({'Open': 0, 'High': 0, 'Low': 0, 'Close': 0, 'Volume': 0}, inplace=True)
 
     # Reset index to get date as a column
     data.reset_index(inplace=True)

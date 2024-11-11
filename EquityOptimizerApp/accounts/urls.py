@@ -14,4 +14,5 @@ urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('profile_detail/', views.ProfileDetailView.as_view(), name='profile_details'),
     path('profile_edit/', views.ProfileEditView.as_view(), name='profile-edit'),
+    path('profile_delete/', views.ProfileDeleteView.as_view(), name='profile-delete'),
 ]

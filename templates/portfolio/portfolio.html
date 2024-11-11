@@ -8,22 +8,32 @@
     <p class="text-center text-muted mb-5">Here you will find details about your portfolios, including stocks, indices, and their performance.</p>
 
     {% if has_portfolios %}
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+        <!-- Loop through user portfolios in rows of three -->
+        <div class="container">
             {% for portfolio in user_portfolios %}
-                <div class="col">
-                    <!-- Portfolio Card -->
+                {% if forloop.counter0|divisibleby:3 %}
+                    <div class="row mb-4">
+                {% endif %}
+
+                <!-- Portfolio Card Column -->
+                <div class="col-md-4 mb-4">
                     <div class="card h-100 shadow-sm rounded-lg">
                         <div class="card-body">
                             <h5 class="card-title">{{ portfolio.name }}</h5>
-                            <p class="card-text">{{ portfolio.description }}</p>
+                            <!-- Truncated Portfolio Description using Django's truncatewords filter -->
+                            <p class="card-text">{{ portfolio.description|truncatewords:10 }}</p>
+                            <!-- Detail View Button -->
+                            <a href="{% url 'portfolio_detail' portfolio.id %}" class="btn btn-primary mt-3">View Details</a>
                         </div>
                         <div class="card-footer text-muted">
                             <small>Created on {{ portfolio.created_at }}</small>
                         </div>
-                        <!-- Link to Portfolio Detail -->
-                        <a href="{% url 'portfolio_detail' portfolio.id %}" class="stretched-link"></a>
                     </div>
                 </div>
+
+                {% if forloop.counter|divisibleby:3 or forloop.last %}
+                    </div>
+                {% endif %}
             {% endfor %}
         </div>
     {% else %}

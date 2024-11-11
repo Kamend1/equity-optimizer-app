@@ -4,6 +4,7 @@
 
 {% block content %}
 <div class="container my-5">
+    <!-- Title Section -->
     <div class="row">
         <div class="col-md-12 text-center">
             <h2 class="mb-4">About Our App</h2>
@@ -11,37 +12,59 @@
         </div>
     </div>
 
-    <div class="row mt-5">
-        <div class="col-lg-6">
-            <h3>What We Do</h3>
-            <p>Our app provides a comprehensive platform for investors to download and analyze stock data, and construct optimal portfolios using the Harry Markowitz Efficient Frontier model. With a focus on educational and testing purposes, our tool offers insights into portfolio optimization, helping you understand the principles of modern portfolio theory.</p>
-        </div>
-        <div class="col-lg-6">
-            <img src="/static/images/about_image.jpg" class="img-fluid rounded" alt="Portfolio Optimization">
-        </div>
-    </div>
-
-    <div class="row mt-5">
-        <div class="col-md-4 text-center">
-            <i class="bi bi-download fa-3x text-primary mb-3"></i>
-            <h4>Step 1: Download Stock Data</h4>
-            <p>Using free data from <strong>yfinance</strong>, our app allows you to download historical stock prices for your chosen companies. Simply enter the stock symbols, and the app will retrieve the relevant data for analysis.</p>
-        </div>
-        <div class="col-md-4 text-center">
-            <i class="bi bi-calculator fa-3x text-primary mb-3"></i>
-            <h4>Step 2: Calculate Optimal Portfolio</h4>
-            <p>Our app utilizes the <strong>Harry Markowitz Efficient Frontier</strong> model to help you calculate the optimal portfolio. By analyzing the risk-return trade-offs, the app suggests the best combination of stocks to maximize returns for a given level of risk.</p>
-        </div>
-        <div class="col-md-4 text-center">
-            <i class="bi bi-bar-chart-line fa-3x text-primary mb-3"></i>
-            <h4>Future Option: Track Your Portfolio</h4>
-            <p>In future releases, our app will include a feature that allows you to track your portfolio's performance over time, making it easier to monitor your investments and make informed decisions.</p>
+    <!-- Mission Statement -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-lg rounded-lg p-4 mb-5">
+                <h3 class="text-center mb-3">Our Mission</h3>
+                <p class="text-center text-muted">Our mission is to democratize access to advanced financial tools and empower individuals to better understand the complexities of portfolio optimization, all in an easy-to-use and accessible platform.</p>
+            </div>
         </div>
     </div>
 
+    <!-- What We Do Section -->
+    <div class="row mt-5">
+        <div class="col-lg-6">
+            <div class="card shadow-sm rounded-lg p-4">
+                <h3>What We Do</h3>
+                <p>Our app provides a comprehensive platform for investors to download and analyze stock data, and construct optimal portfolios using the Harry Markowitz Efficient Frontier model. With a focus on educational and testing purposes, our tool offers insights into portfolio optimization, helping you understand the principles of modern portfolio theory.</p>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="/static/images/about_image.jpg" class="img-fluid rounded shadow-sm" alt="Portfolio Optimization">
+        </div>
+    </div>
+
+    <!-- Steps Section -->
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm rounded-lg p-4">
+                <i class="bi bi-download fa-3x text-primary mb-3"></i>
+                <h4>Step 1: Download Stock Data</h4>
+                <p>Using free data from <strong>yfinance</strong>, our app allows you to download historical stock prices for your chosen companies. Simply enter the stock symbols, and the app will retrieve the relevant data for analysis.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm rounded-lg p-4">
+                <i class="bi bi-calculator fa-3x text-primary mb-3"></i>
+                <h4>Step 2: Calculate Optimal Portfolio</h4>
+                <p>Our app utilizes the <strong>Harry Markowitz Efficient Frontier</strong> model to help you calculate the optimal portfolio. By analyzing the risk-return trade-offs, the app suggests the best combination of stocks to maximize returns for a given level of risk.</p>
+                <p>Create multiple lists of favorite stocks, each list containing between 5 and 50 stocks. Simulate portfolios using our Simulation function to create optimal portfolios.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm rounded-lg p-4">
+                <i class="bi bi-bar-chart-line fa-3x text-primary mb-3"></i>
+                <h4>Step 3: Track Your Portfolio</h4>
+                <p>Track your portfolio's performance over time, making it easier to monitor your investments and make informed decisions.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disclaimer Section -->
     <div class="row mt-5">
         <div class="col-md-12">
-            <div class="alert alert-warning" role="alert">
+            <div class="alert alert-warning shadow-sm rounded-lg p-4">
                 <h4 class="alert-heading">Important Disclaimer</h4>
                 <p>This app is intended for educational and testing purposes only. It does not provide investment advice and should not be used as a sole source for making investment decisions. The developers and creators of this app are not responsible for any financial losses incurred as a result of using the app.</p>
                 <hr>
@@ -49,13 +72,5 @@
             </div>
         </div>
     </div>
-
-    <div class="row mt-5">
-        <div class="col-md-12 text-center">
-            <h3>Our Mission</h3>
-            <p>Our mission is to democratize access to advanced financial tools and empower individuals to better understand the complexities of portfolio optimization, all in an easy-to-use and accessible platform.</p>
-        </div>
-    </div>
 </div>
 {% endblock %}
-

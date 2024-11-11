@@ -54,30 +54,51 @@ class CustomAuthenticationForm(AuthenticationForm):
 
 class BaseProfileForm(forms.ModelForm):
     username = forms.CharField(max_length=150)
-    first_name = forms.CharField(max_length=30)
-    last_name = forms.CharField(max_length=30)
-    email = forms.EmailField()
+    first_name = forms.CharField(max_length=30, required=False)
+    last_name = forms.CharField(max_length=30, required=False)
+    email = forms.EmailField(required=False)
 
     profile_image = forms.URLField(required=False)
     profile_link = forms.URLField(required=False)
     age = forms.IntegerField(required=False)
-    investor_level = forms.ChoiceField(choices=InvestorLevelChoices.choices, required=False)
-    bio = forms.CharField(widget=forms.Textarea, required=False)
+    investor_level = forms.ChoiceField(
+        choices=InvestorLevelChoices.choices,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        required=False,
+    )
+    bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}), required=False)
 
     class Meta:
         model = Profile
         fields = ['profile_image', 'profile_link', 'age', 'investor_level', 'bio']
 
+        help_texts = {
+            'profile_image': 'Enter a link to an image you would like to have for your profile',
+            'profile_link': 'Enter a link to your LinkedIn profile or other suitable link',
+            'investor_level': 'Select your investor level as defined according to MiFID standards',
+        }
+
     def __init__(self, *args, **kwargs):
-        user = kwargs.get('user')
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # Prepopulate the form with the User data
+        for field in self.fields.values():
+            if not isinstance(field.widget, forms.widgets.Select):
+                field.widget.attrs['class'] = 'form-control'
+
         if user:
-            self.fields['username'].initial = user.username
-            self.fields['first_name'].initial = user.first_name
-            self.fields['last_name'].initial = user.last_name
-            self.fields['email'].initial = user.email
+            self.fields['username'].initial = user.username or ''
+            self.fields['first_name'].initial = user.first_name or ''
+            self.fields['last_name'].initial = user.last_name or ''
+            self.fields['email'].initial = user.email or ''
+
+        profile = kwargs.get('instance')
+        if profile:
+            self.fields['profile_image'].initial = profile.profile_image or ''
+            self.fields['profile_link'].initial = profile.profile_link or ''
+            self.fields['age'].initial = profile.age or ''
+            self.fields['investor_level'].initial = profile.investor_level or ''
+            self.fields['bio'].initial = profile.bio or ''
 
 
 class ProfileEditForm(BaseProfileForm):

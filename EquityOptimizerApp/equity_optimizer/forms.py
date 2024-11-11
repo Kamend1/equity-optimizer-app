@@ -1,6 +1,6 @@
 from django import forms
+from datetime import date
 from django.core.exceptions import ValidationError
-from .models import Stock
 from ..user_stock_lists.models import FavoriteStockList
 
 
@@ -10,8 +10,17 @@ class BaseDataRangeForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
 
-        # Additional cleaning logic can go here if needed
+        if start_date and end_date and start_date > end_date:
+            self.add_error('end_date', "End date cannot be earlier than start date.")
+
+        min_date = date(2010, 1, 1)
+        if start_date and start_date < min_date:
+            self.add_error('start_date', "Start date cannot be before January 1, 2010.")
+        if end_date and end_date < min_date:
+            self.add_error('end_date', "End date cannot be before January 1, 2010.")
 
         return cleaned_data
 

@@ -10,51 +10,63 @@
                     <div class="card-body">
                         <h2 class="text-center mb-4">{{ user.get_full_name }}</h2>
 
+                        <!-- Profile Image -->
                         <div class="text-center mb-4">
                             {% if not profile.profile_image %}
-                                <img src="{% static 'images/no_profile_pic.jfif' %}" 
-                                     alt="Profile Image" 
+                                <img src="{% static 'images/no_profile_pic.jfif' %}"
+                                     alt="Profile Image"
                                      class="img-fluid rounded-circle"
                                      style="max-width: 150px; height: 150px;">
                             {% else %}
-                                <img src="{{ profile.profile_image }}" 
-                                     alt="Profile Image" 
+                                <img src="{{ profile.profile_image }}"
+                                     alt="Profile Image"
                                      class="img-fluid rounded-circle"
                                      style="max-width: 150px; height: 150px;">
                             {% endif %}
                         </div>
 
+                        <!-- User Information -->
                         <div class="mb-3">
                             <p><strong>Username:</strong> <span>{{ user.username }}</span></p>
                         </div>
-
                         <div class="mb-3">
                             <p><strong>Email:</strong> <span>{{ user.email }}</span></p>
                         </div>
-
                         <div class="mb-3">
-                            <p><strong>Profile Link:</strong> 
-                               <a href="{{ profile.profile_link }}" target="_blank">{{ profile.profile_link }}</a>
+                            <p><strong>Profile Link:</strong>
+                                <a href="{{ profile.profile_link }}" target="_blank">{{ profile.profile_link }}</a>
                             </p>
                         </div>
-
                         <div class="mb-3">
                             <p><strong>Age:</strong> <span>{{ profile.age }}</span></p>
                         </div>
-
                         <div class="mb-3">
-                            <p><strong>Investor Level:</strong> <span>{{ profile.get_investor_level_display }}</span></p>
+                            <p><strong>Investor Level:</strong> <span>{{ profile.get_investor_level_display }}</span>
+                            </p>
                         </div>
-
                         <div class="mb-4">
                             <p><strong>Bio:</strong> <span>{{ profile.bio }}</span></p>
                         </div>
 
-                        <a class="btn btn-primary btn-lg btn-block" href="{% url 'profile-edit' %}">Edit Profile</a>
-                        <a class="btn btn-primary btn-lg btn-block" href="{% url 'password_change' %}">Change Password</a>
+                        <!-- Action Buttons -->
+                        <a class="btn btn-primary btn-lg btn-block mb-3" href="{% url 'profile-edit' %}">Edit
+                            Profile</a>
+                        <a class="btn btn-primary btn-lg btn-block mb-3" href="{% url 'password_change' %}">Change
+                            Password</a>
+
+                        <!-- Delete Button -->
+                        <a class="btn btn-danger btn-lg btn-block mb-3" href="{% url 'profile-delete' %}"
+                           onclick="return confirm('Are you sure you want to delete your profile? This action cannot be undone.');">
+                            <i class="fas fa-trash-alt"></i> Delete Profile
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Include Bootstrap and FontAwesome from CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
