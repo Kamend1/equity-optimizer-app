@@ -35,7 +35,8 @@
                     {% for stock in stock_details %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
-                                <strong>{{ stock.name }} ({{ stock.ticker }})</strong> - {{ stock.quantity }} shares
+                                <strong>{{ stock.name }} ({{ stock.ticker }})</strong>
+                                - {{ stock.quantity|floatformat:2 }} shares
                             </div>
                             <span class="badge badge-info badge-pill">
                             Last Close: ${{ stock.last_close|floatformat:2 }}
@@ -48,8 +49,19 @@
             </div>
         </div>
 
-        <!-- Navigation Button -->
+        <!-- Navigation Buttons -->
         <div class="text-center mt-4">
+            <a href="{% url 'portfolio-value-history' portfolio.id %}" class="btn btn-info btn-lg rounded-pill">
+                <i class="fas fa-chart-line"></i> View Value History
+            </a>
+        </div>
+        <div class="text-center mt-4">
+            <!-- Edit Portfolio Button -->
+            <a href="{% url 'portfolio-edit' portfolio.id %}" class="btn btn-primary btn-lg rounded-pill">
+                <i class="fas fa-edit"></i> Edit Portfolio
+            </a>
+
+            <!-- Back to Portfolios Button -->
             <a href="{% url 'portfolio' %}" class="btn btn-secondary btn-lg rounded-pill">
                 <i class="fas fa-arrow-left"></i> Back to Portfolios
             </a>

@@ -31,8 +31,8 @@ def save_portfolio_from_simulation(user, name, description, best_portfolio_data,
     total_portfolio_value = 0
     for weight, stock_symbol in best_portfolio_data['Weights']:
         stock = Stock.objects.get(ticker=stock_symbol)
-        stock_price = stock.last_adj_close()  # Assuming you have a method to get the current price
-        quantity = floor((initial_investment * float(weight) / 100) // stock_price)
+        stock_price = stock.last_adj_close()
+        quantity = (initial_investment * float(weight) / 100) // stock_price
         total_portfolio_value += quantity * stock_price
 
         PortfolioStock.objects.create(

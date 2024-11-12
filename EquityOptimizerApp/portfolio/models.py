@@ -37,7 +37,7 @@ class Portfolio(CreatedAtMixin, UpdatedAtMixin):
 class PortfolioStock(models.Model):
     portfolio = models.ForeignKey('portfolio.Portfolio', on_delete=models.CASCADE, related_name='portfolio_stocks')
     stock = models.ForeignKey('equity_optimizer.Stock', on_delete=models.CASCADE, related_name='portfolio_stocks')
-    quantity = models.PositiveIntegerField()
+    quantity = models.FloatField()
 
     class Meta:
         unique_together = ('portfolio', 'stock')  # Ensure a stock can only be in a portfolio once

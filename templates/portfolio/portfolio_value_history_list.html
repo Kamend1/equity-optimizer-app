@@ -1,0 +1,53 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Portfolio Value History{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg rounded-lg">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ portfolio.name }} - Value History</h2>
+        </div>
+        <div class="card-body">
+            <form method="get" class="mb-4">
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+
+            {% if value_history %}
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Portfolio Value</th>
+                            <th>Daily Return</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in value_history %}
+                            <tr>
+                                <td>{{ entry.date }}</td>
+                                <td>${{ entry.value|floatformat:2 }}</td>
+                                <td>{{ entry.daily_return|floatformat:2 }}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-center text-muted">No value history available for this portfolio.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'portfolio-detail' portfolio.id %}" class="btn btn-secondary btn-lg rounded-pill">
+            <i class="fas fa-arrow-left"></i> Back to Portfolio
+        </a>
+    </div>
+</div>
+
+<!-- Include Bootstrap and FontAwesome from CDN if not already included -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

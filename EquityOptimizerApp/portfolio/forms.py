@@ -7,9 +7,12 @@ class PortfolioForm(forms.ModelForm):
         model = Portfolio
         fields = ['name', 'description', 'public']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control'}),
-            'public': forms.CheckboxInput(attrs={'class': 'form-check-input'})  # Corrected line
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter portfolio name'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter portfolio description'}),
+            'public': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',  # Bootstrap class for checkboxes
+                'style': 'margin-left: 0.5em; margin-top: 0.3em;'  # Additional spacing
+            })
         }
         labels = {
             'name': 'Portfolio Name',

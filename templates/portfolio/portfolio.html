@@ -23,7 +23,7 @@
                             <!-- Truncated Portfolio Description using Django's truncatewords filter -->
                             <p class="card-text">{{ portfolio.description|truncatewords:10 }}</p>
                             <!-- Detail View Button -->
-                            <a href="{% url 'portfolio_detail' portfolio.id %}" class="btn btn-primary mt-3">View Details</a>
+                            <a href="{% url 'portfolio-detail' portfolio.id %}" class="btn btn-primary mt-3">View Details</a>
                         </div>
                         <div class="card-footer text-muted">
                             <small>Created on {{ portfolio.created_at }}</small>
