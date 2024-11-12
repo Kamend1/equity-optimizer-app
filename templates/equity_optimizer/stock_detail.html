@@ -1,118 +1,141 @@
 {% extends 'common/base.html' %}
 {% load humanize %}
-
+{% load custom_filters %}
 {% block title %}{{ stock.name }} ({{ stock.ticker }}) - Stock Details{% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
-        <div class="card shadow-lg rounded-lg mb-4">
-            <div class="card-header bg-primary text-white">
-                <h2 class="mb-0">{{ stock.name }} ({{ stock.ticker }})</h2>
-            </div>
-            <div class="card-body">
-                <h4 class="text-muted">{{ stock.sector }}</h4>
-                <hr>
-
-                <!-- Company Details -->
-                <h5>Company Details</h5>
-                <dl class="row">
-                    <dt class="col-sm-4">Market Cap:</dt>
-                    <dd class="col-sm-8">{{ stock.market_cap|intcomma }}</dd>
-                    <dt class="col-sm-4">Enterprise Value:</dt>
-                    <dd class="col-sm-8">{{ stock.enterprise_value|intcomma }}</dd>
-                    <dt class="col-sm-4">Trailing P/E:</dt>
-                    <dd class="col-sm-8">{{ stock.trailing_pe|floatformat:2 }}</dd>
-                    <dt class="col-sm-4">Forward P/E:</dt>
-                    <dd class="col-sm-8">{{ stock.forward_pe|floatformat:2 }}</dd>
-                    <dt class="col-sm-4">PEG Ratio:</dt>
-                    <dd class="col-sm-8">{{ stock.peg_ratio|floatformat:2 }}</dd>
-                    <dt class="col-sm-4">Price to Book:</dt>
-                    <dd class="col-sm-8">{{ stock.price_to_book|floatformat:2 }}</dd>
-                </dl>
-                <hr>
-
-                <!-- Financial Data -->
-                <h5>Financial Data</h5>
-                <dl class="row">
-                    <dt class="col-sm-4">Revenue:</dt>
-                    <dd class="col-sm-8">{{ stock.revenue|intcomma }}</dd>
-                    <dt class="col-sm-4">Gross Profit:</dt>
-                    <dd class="col-sm-8">{{ stock.gross_profit|intcomma }}</dd>
-                    <dt class="col-sm-4">EBITDA:</dt>
-                    <dd class="col-sm-8">{{ stock.ebitda|intcomma }}</dd>
-                    <dt class="col-sm-4">Net Income:</dt>
-                    <dd class="col-sm-8">{{ stock.net_income|intcomma }}</dd>
-                    <dt class="col-sm-4">Diluted EPS:</dt>
-                    <dd class="col-sm-8">{{ stock.diluted_eps|floatformat:2 }}</dd>
-                </dl>
-                <hr>
-
-                <!-- Balance Sheet Data -->
-                <h5>Balance Sheet Data</h5>
-                <dl class="row">
-                    <dt class="col-sm-4">Total Cash:</dt>
-                    <dd class="col-sm-8">{{ stock.total_cash|intcomma }}</dd>
-                    <dt class="col-sm-4">Total Debt:</dt>
-                    <dd class="col-sm-8">{{ stock.total_debt|intcomma }}</dd>
-                    <dt class="col-sm-4">Total Assets:</dt>
-                    <dd class="col-sm-8">{{ stock.total_assets|intcomma }}</dd>
-                    <dt class="col-sm-4">Total Liabilities:</dt>
-                    <dd class="col-sm-8">{{ stock.total_liabilities|intcomma }}</dd>
-                </dl>
-                <hr>
-
-                <!-- Dividend Data -->
-                <h5>Dividend Data</h5>
-                <dl class="row">
-                    <dt class="col-sm-4">Dividend Yield:</dt>
-                    <dd class="col-sm-8">{{ stock.dividend_yield|floatformat:2 }}%</dd>
-                    <dt class="col-sm-4">Dividend Rate:</dt>
-                    <dd class="col-sm-8">{{ stock.dividend_rate|floatformat:2 }}</dd>
-                    <dt class="col-sm-4">Payout Ratio:</dt>
-                    <dd class="col-sm-8">{{ stock.payout_ratio|floatformat:2 }}%</dd>
-                </dl>
-                <hr>
-
-                <!-- Stock Performance Data -->
-                <h5>Stock Performance Data</h5>
-                <dl class="row">
-                    <dt class="col-sm-4">Beta:</dt>
-                    <dd class="col-sm-8">{{ stock.beta|floatformat:2 }}</dd>
-                    <dt class="col-sm-4">52-Week High:</dt>
-                    <dd class="col-sm-8">{{ stock.fifty_two_week_high|floatformat:2 }}</dd>
-                    <dt class="col-sm-4">52-Week Low:</dt>
-                    <dd class="col-sm-8">{{ stock.fifty_two_week_low|floatformat:2 }}</dd>
-                    <dt class="col-sm-4">Average Daily Volume:</dt>
-                    <dd class="col-sm-8">{{ stock.average_daily_volume|intcomma }}</dd>
-                </dl>
-
-                <!-- Analyze Stock Button -->
-                <div class="text-center mt-4">
-                    <form action="{% url 'analyze_stock' stock.ticker %}" method="get">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary btn-lg rounded-pill">
-                            <i class="fas fa-chart-line"></i> Analyze Stock
-                        </button>
-                    </form>
-                </div>
-            </div>
+<div class="container mt-5">
+    <div class="card shadow-lg rounded-lg mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ stock.name }} ({{ stock.ticker }})</h2>
         </div>
-        
-        <div class="text-center mt-4">
-            <a href="{% url 'stock_data_list' stock.ticker %}" class="btn btn-info btn-lg rounded-pill">
-                <i class="fas fa-database"></i> View Historical Data
-            </a>
-        </div>
-        <!-- Back to Stock List Button -->
-        <div class="text-center mt-3">
-            <a href="{% url 'stock_list' %}" class="btn btn-secondary btn-lg rounded-pill">
-                <i class="fas fa-arrow-left"></i> Back to Stock List
-            </a>
+        <div class="card-body">
+            <h4 class="text-muted">{{ stock.sector }} - {{ stock.industry }}</h4>
+            <p class="text-danger">{{ stock.delisted|yesno:"Delisted,Active" }}</p>
+            <hr>
+
+            <!-- Company Profile -->
+            <h5>Company Profile</h5>
+            <dl class="row">
+                <dt class="col-sm-4">Website:</dt>
+                <dd class="col-sm-8">
+                    <a href="{{ stock.website }}" target="_blank">{{ stock.website }}</a>
+                </dd>
+                <dt class="col-sm-4">Address:</dt>
+                <dd class="col-sm-8">{{ stock.address1 }}, {{ stock.city }}, {{ stock.state }}, {{ stock.country }}</dd>
+                <dt class="col-sm-4">Phone:</dt>
+                <dd class="col-sm-8">{{ stock.phone }}</dd>
+                <dt class="col-sm-4">Full Time Employees:</dt>
+                <dd class="col-sm-8">{{ stock.full_time_employees|intcomma }}</dd>
+                <dt class="col-sm-4">Long Business Summary:</dt>
+                <dd class="col-sm-8">{{ stock.long_business_summary }}</dd>
+            </dl>
+            <hr>
+
+            <!-- Market Data -->
+            <h5>Market Data</h5>
+            <dl class="row">
+                <dt class="col-sm-4">Market Cap:</dt>
+                <dd class="col-sm-8">{{ stock.market_cap|intcomma }}</dd>
+                <dt class="col-sm-4">Enterprise Value:</dt>
+                <dd class="col-sm-8">{{ stock.enterprise_value|intcomma }}</dd>
+                <dt class="col-sm-4">Trailing P/E:</dt>
+                <dd class="col-sm-8">{{ stock.trailing_pe|floatformat:2 }}</dd>
+                <dt class="col-sm-4">Forward P/E:</dt>
+                <dd class="col-sm-8">{{ stock.forward_pe|floatformat:2 }}</dd>
+                <dt class="col-sm-4">PEG Ratio:</dt>
+                <dd class="col-sm-8">{{ stock.peg_ratio|floatformat:2 }}</dd>
+                <dt class="col-sm-4">Price to Book:</dt>
+                <dd class="col-sm-8">{{ stock.price_to_book|floatformat:2 }}</dd>
+                <dt class="col-sm-4">Beta:</dt>
+                <dd class="col-sm-8">{{ stock.beta|floatformat:2 }}</dd>
+            </dl>
+            <hr>
+
+            <!-- Financial Data -->
+            <h5>Financial Data</h5>
+            <dl class="row">
+                <dt class="col-sm-4">Revenue:</dt>
+                <dd class="col-sm-8">{{ stock.revenue|intcomma }}</dd>
+                <dt class="col-sm-4">Gross Profit:</dt>
+                <dd class="col-sm-8">{{ stock.gross_profit|intcomma }}</dd>
+                <dt class="col-sm-4">EBITDA:</dt>
+                <dd class="col-sm-8">{{ stock.ebitda|intcomma }}</dd>
+                <dt class="col-sm-4">Net Income:</dt>
+                <dd class="col-sm-8">{{ stock.net_income|intcomma }}</dd>
+                <dt class="col-sm-4">Diluted EPS:</dt>
+                <dd class="col-sm-8">{{ stock.diluted_eps|floatformat:2 }}</dd>
+                <dt class="col-sm-4">Profit Margin:</dt>
+                <dd class="col-sm-8">{{ stock.profit_margin|floatformat:2 }}%</dd>
+                <dt class="col-sm-4">Operating Margin:</dt>
+                <dd class="col-sm-8">{{ stock.operating_margin|floatformat:2 }}%</dd>
+            </dl>
+            <hr>
+
+            <!-- Balance Sheet Data -->
+            <h5>Balance Sheet Data</h5>
+            <dl class="row">
+                <dt class="col-sm-4">Total Cash:</dt>
+                <dd class="col-sm-8">{{ stock.total_cash|intcomma }}</dd>
+                <dt class="col-sm-4">Total Debt:</dt>
+                <dd class="col-sm-8">{{ stock.total_debt|intcomma }}</dd>
+                <dt class="col-sm-4">Total Assets:</dt>
+                <dd class="col-sm-8">{{ stock.total_assets|intcomma }}</dd>
+                <dt class="col-sm-4">Total Liabilities:</dt>
+                <dd class="col-sm-8">{{ stock.total_liabilities|intcomma }}</dd>
+            </dl>
+            <hr>
+
+            <!-- Dividend Data -->
+            <h5>Dividend Data</h5>
+            <dl class="row">
+                <dt class="col-sm-4">Dividend Yield:</dt>
+                <dd class="col-sm-8">{{ stock.dividend_yield|multiply:100|floatformat:2 }}%</dd>
+                <dt class="col-sm-4">Dividend Rate:</dt>
+                <dd class="col-sm-8">{{ stock.dividend_rate|floatformat:2 }}</dd>
+                <dt class="col-sm-4">Payout Ratio:</dt>
+                <dd class="col-sm-8">{{ stock.payout_ratio|floatformat:2 }}%</dd>
+                <dt class="col-sm-4">Ex-Dividend Date:</dt>
+                <dd class="col-sm-8">{{ stock.ex_dividend_date }}</dd>
+                <dt class="col-sm-4">Last Dividend Date:</dt>
+                <dd class="col-sm-8">{{ stock.last_dividend_date }}</dd>
+            </dl>
+            <hr>
+
+            <!-- ESG Data -->
+            <h5>ESG Scores</h5>
+            <pre>{{ stock.esg_scores|default:"No ESG data available" }}</pre>
+
+            <!-- Analyst Recommendations -->
+            <h5>Analyst Recommendations</h5>
+            <pre>{{ stock.recommendations|default:"No recommendations available" }}</pre>
+
+            <!-- Analyze Stock Button -->
+            <div class="text-center mt-4">
+                <form action="{% url 'analyze_stock' stock.ticker %}" method="get">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">
+                        <i class="fas fa-chart-line"></i> Analyze Stock
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Include Bootstrap and FontAwesome from CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <div class="text-center mt-4">
+        <a href="{% url 'stock_data_list' stock.ticker %}" class="btn btn-info btn-lg rounded-pill">
+            <i class="fas fa-database"></i> View Historical Data
+        </a>
+    </div>
+    <div class="text-center mt-3">
+        <a href="{% url 'stock_list' %}" class="btn btn-secondary btn-lg rounded-pill">
+            <i class="fas fa-arrow-left"></i> Back to Stock List
+        </a>
+    </div>
+</div>
+
+<!-- Include Bootstrap and FontAwesome from CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

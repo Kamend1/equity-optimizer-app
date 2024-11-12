@@ -70,14 +70,13 @@ class InitialForm(forms.Form):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-        # Limit the favorite_list choices to the current user's stock lists
+
         if user is not None:
             self.fields['favorite_list'].queryset = FavoriteStockList.objects.filter(user=user)
 
     def clean(self):
         cleaned_data = super().clean()
 
-        # Convert risk-free rate percentage to decimal
         risk_free_rate = cleaned_data.get('risk_free_rate')
         if risk_free_rate is not None:
             cleaned_data['risk_free_rate'] = risk_free_rate / 100

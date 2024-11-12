@@ -1,9 +1,13 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from EquityOptimizerApp.portfolio.models import Portfolio
+from django.urls import reverse_lazy, reverse
+from django.views.generic import UpdateView, DetailView
+
+from EquityOptimizerApp.portfolio.models import Portfolio, PortfolioStock, PortfolioValueHistory
 from EquityOptimizerApp.portfolio.forms import PortfolioForm
-from EquityOptimizerApp.portfolio.services import save_portfolio_from_simulation
+from EquityOptimizerApp.portfolio.services import save_portfolio_from_simulation, update_all_portfolios_daily_values
 
 
 @login_required
@@ -69,14 +73,78 @@ def save_portfolio_view(request):
 
 
 # Create your views here.
-@login_required
-def portfolio_detail(request, portfolio_id):
-    # Fetch the portfolio for the authenticated user
-    portfolio = get_object_or_404(Portfolio, id=portfolio_id, user=request.user)
+class PortfolioDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Portfolio
+    template_name = 'portfolio/portfolio_detail.html'
+    context_object_name = 'portfolio'
 
-    context = {
-        'portfolio': portfolio,
-        # 'portfolio_value': portfolio.calculate_value(),
-    }
+    def get_object(self, queryset=None):
+        return get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'], user=self.request.user)
 
-    return render(request, 'equity_optimizer/../../templates/portfolio/portfolio_detail.html', context)
+    def test_func(self):
+        portfolio = self.get_object()
+        return portfolio.user == self.request.user
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        portfolio = context['portfolio']
+
+        # Retrieve related stocks and their details
+        portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio).select_related('stock')
+        stock_details = [
+            {
+                'name': ps.stock.name,
+                'ticker': ps.stock.ticker,
+                'quantity': ps.quantity,
+                'last_close': ps.stock.last_adj_close(),
+            }
+            for ps in portfolio_stocks
+        ]
+
+        latest_value_entry = PortfolioValueHistory.objects.filter(portfolio=portfolio).order_by('-date').first()
+        latest_value_date = latest_value_entry.date if latest_value_entry else None
+        latest_value = latest_value_entry.value if latest_value_entry else None
+
+        context.update({
+            'stock_details': stock_details,
+            'latest_value_date': latest_value_date,
+            'latest_value': latest_value,
+            'user_profile_link': reverse('profile_details', kwargs={'pk': portfolio.user.pk}),
+        })
+
+        return context
+
+
+class PortfolioEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Portfolio
+    form_class = PortfolioForm
+    template_name = 'portfolio/portfolio_edit.html'
+    success_url = reverse_lazy('portfolio')
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(Portfolio, pk=self.kwargs['pk'], user=self.request.user)
+
+    def test_func(self):
+        portfolio = self.get_object()
+        return portfolio.user == self.request.user
+
+    def handle_no_permission(self):
+        messages.error(self.request, "You don't have permission to edit this portfolio.")
+        return redirect('portfolio_list')
+
+
+@user_passes_test(lambda u: u.is_staff)
+def update_portfolios_view(request):
+    if request.method == 'POST':
+        try:
+            # Call the function to update daily portfolio values for all portfolios
+            update_all_portfolios_daily_values()
+            messages.success(request, 'Portfolio values updated successfully!')
+        except Exception as e:
+            messages.error(request, f'Failed to update portfolio values. Error: {str(e)}')
+
+        return redirect('update_portfolios')  # Ensure 'update_portfolios' is defined in your URL configurations
+
+    # Render the update page if the request method is GET
+    return render(request, 'portfolio/update_portfolios.html')

@@ -2,7 +2,6 @@ import os
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView
 from django.contrib import messages
 from .models import Stock, StockData
@@ -10,11 +9,13 @@ from .forms import DateRangeForm, InitialForm
 import pandas as pd
 import json
 import logging
-from .services import (check_stock_exists, add_stock_to_db, download_and_save_stock_data, get_filtered_stocks,
-                       get_stock_by_ticker, plot_financial_data, generate_trend_pie_chart, get_trend_summary,
-                       get_stock_data_by_ticker, generate_candlestick_chart, generate_histogram_chart, run_simulation,
-                       update_stock_data, fetch_stock_data, generate_portfolio_simulation_figures)
+from .services import StockService, StockDataService, FigureService, SimulationService, YFinanceFetcher, DataFetcher, \
+    StockUpdateService
 from .. import settings
+
+fetcher: DataFetcher = YFinanceFetcher()
+stock_service = StockService(fetcher)
+stock_data_service = StockDataService(fetcher)
 
 
 @login_required
@@ -30,8 +31,7 @@ def simulation(request):
             sim_runs = initial_form.cleaned_data['sim_runs']
             favorite_list = initial_form.cleaned_data['favorite_list']
 
-            # Fetch selected stock list's stock tickers
-            selected_stocks = favorite_list.stocks.all()
+            selected_stocks = favorite_list.stocks.all().order_by('ticker')
             stock_symbols = sorted([stock.ticker for stock in selected_stocks])
 
             if not stock_symbols:
@@ -39,17 +39,13 @@ def simulation(request):
                 return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
 
             try:
-                # Fetch stock data
-                close_price_df = fetch_stock_data(stock_symbols, start_date=start_date, end_date=end_date)
-                print(close_price_df)
-                print(f"Stock price data summary:\n{close_price_df.describe()}")
+                close_price_df = stock_data_service.fetch_stock_data(stock_symbols, start_date, end_date)
             except Exception as e:
                 messages.error(request, f"Failed to fetch stock data: {str(e)}")
                 return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
 
             try:
-                # Run the simulation
-                sim_out_df, best_portfolio_data = run_simulation(
+                sim_out_df, best_portfolio_data = SimulationService.run_simulation(
                     stock_symbols,
                     len(stock_symbols),
                     initial_investment,
@@ -62,10 +58,9 @@ def simulation(request):
                 return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
 
             try:
-                # Generate portfolio simulation figures
-                fig1_html, fig2_html, fig3_html, fig4_html = generate_portfolio_simulation_figures(
+                fig1_html, fig2_html, fig3_html, fig4_html = FigureService.generate_simulation_figures(
                     sim_out_df,
-                    best_portfolio_data,
+                    best_portfolio_data
                 )
             except Exception as e:
                 messages.error(request, f"Failed to generate figures: {str(e)}")
@@ -87,6 +82,7 @@ def simulation(request):
                 'best_portfolio_data': best_portfolio_data,
             }
             return render(request, 'equity_optimizer/simulation_results.html', context)
+
         else:
             return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
 
@@ -99,27 +95,23 @@ def simulation(request):
 def add_stock(request):
     if request.method == 'POST':
         ticker = request.POST.get('ticker')
-
         if ticker:
-            if check_stock_exists(ticker):
-                messages.error(request, 'Stock already exists')
+            if stock_service.check_stock_exists(ticker):
+                messages.error(request, 'Stock already exists.')
                 return render(request, 'equity_optimizer/add.html', {'ticker': ticker})
 
             try:
-                # Add the stock to the database
-                stock = add_stock_to_db(ticker)
-                # Download and save the historical stock data
-                download_and_save_stock_data(stock)
+                stock = stock_service.add_stock_to_db(ticker)
+                stock_list = [stock,]
+                stock_data_service.download_and_save_stock_data(stock_list)
                 messages.success(request, f'Stock {ticker} added successfully!')
             except Exception as e:
-                # Handle the case where data retrieval fails
-                messages.error(request, f'Failed to retrieve data for ticker {ticker}. Error: {str(e)}')
+                messages.error(request, f'Error adding stock: {str(e)}')
                 return render(request, 'equity_optimizer/add.html', {'ticker': ticker})
 
             return redirect('stock_list')
 
     return render(request, 'equity_optimizer/add.html')
-
 
 
 def analyze_stock(request, ticker):
@@ -129,7 +121,6 @@ def analyze_stock(request, ticker):
 
     form = DateRangeForm(request.GET or None)
 
-    # Validate and parse the dates from the form
     if form.is_valid():
         start_date = form.cleaned_data.get('start_date') or default_start_date
         end_date = form.cleaned_data.get('end_date') or default_end_date
@@ -137,18 +128,17 @@ def analyze_stock(request, ticker):
         start_date = default_start_date
         end_date = default_end_date
 
-    df = get_stock_data_by_ticker(ticker, start_date, end_date)
+    df = stock_data_service.get_stock_data_by_ticker(ticker, start_date, end_date)
     print(df.dtypes)
     print(df)
 
-    chart_html = plot_financial_data(df, f'Financial Data for {ticker}')
+    chart_html = FigureService.plot_financial_data(df, f'Financial Data for {ticker}')
 
-    trend_summary = get_trend_summary(ticker, start_date, end_date)
-    trend_chart = generate_trend_pie_chart(trend_summary)
+    trend_chart = FigureService.generate_trend_pie_chart(ticker, start_date, end_date)
 
-    candlestick_chart_html = generate_candlestick_chart(df, f'{ticker} Candlestick Chart')
+    candlestick_chart_html = FigureService.generate_candlestick_chart(df, f'{ticker} Candlestick Chart')
 
-    histogram_chart = generate_histogram_chart(df, f'{ticker} Histogram of Daily Returns')
+    histogram_chart = FigureService.generate_histogram_chart(df, f'{ticker} Histogram of Daily Returns')
 
     context = {
         'chart_html': chart_html,
@@ -179,13 +169,13 @@ class StockListView(ListView):
         return context
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('ticker')
+        queryset = super().get_queryset().filter(delisted=False).order_by('ticker')
         query = self.request.GET.get('q', '')
         sort = self.request.GET.get('sort', '')
         direction = self.request.GET.get('direction', 'asc')
 
         if query:
-            queryset = get_filtered_stocks(query)
+            queryset = stock_service.get_filtered_stocks(query).filter(delisted=False)
 
         if sort:
             if direction == 'desc':
@@ -204,7 +194,6 @@ class StockDetailView(DetailView):
     slug_url_kwarg = 'ticker'
 
     def get_object(self, queryset=None):
-        # Fetch stock using the ticker field
         return get_object_or_404(Stock, ticker=self.kwargs.get('ticker'))
 
 
@@ -212,7 +201,7 @@ class StockDetailView(DetailView):
 def update_stocks_view(request):
     if request.method == 'POST':
         try:
-            update_stock_data()
+            StockUpdateService.update_stock_data()
             messages.success(request, 'Stock data updated successfully!')
         except Exception as e:
             messages.error(request, f'Failed to update stock data. Error: {str(e)}')

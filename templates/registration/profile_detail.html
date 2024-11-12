@@ -8,7 +8,7 @@
             <div class="col-md-8 col-lg-6">
                 <div class="card shadow-lg rounded-lg">
                     <div class="card-body">
-                        <h2 class="text-center mb-4">{{ user.get_full_name }}</h2>
+                        <h2 class="text-center mb-4">{{ profile.user.get_full_name }}</h2>
 
                         <!-- Profile Image -->
                         <div class="text-center mb-4">
@@ -27,10 +27,10 @@
 
                         <!-- User Information -->
                         <div class="mb-3">
-                            <p><strong>Username:</strong> <span>{{ user.username }}</span></p>
+                            <p><strong>Username:</strong> <span>{{ profile.user.username }}</span></p>
                         </div>
                         <div class="mb-3">
-                            <p><strong>Email:</strong> <span>{{ user.email }}</span></p>
+                            <p><strong>Email:</strong> <span>{{ profile.user.email }}</span></p>
                         </div>
                         <div class="mb-3">
                             <p><strong>Profile Link:</strong>
@@ -48,17 +48,19 @@
                             <p><strong>Bio:</strong> <span>{{ profile.bio }}</span></p>
                         </div>
 
-                        <!-- Action Buttons -->
-                        <a class="btn btn-primary btn-lg btn-block mb-3" href="{% url 'profile-edit' %}">Edit
-                            Profile</a>
-                        <a class="btn btn-primary btn-lg btn-block mb-3" href="{% url 'password_change' %}">Change
-                            Password</a>
-
-                        <!-- Delete Button -->
-                        <a class="btn btn-danger btn-lg btn-block mb-3" href="{% url 'profile-delete' %}"
-                           onclick="return confirm('Are you sure you want to delete your profile? This action cannot be undone.');">
-                            <i class="fas fa-trash-alt"></i> Delete Profile
-                        </a>
+                        <!-- Action Buttons only for the owner of the profile -->
+                        {% if profile.user == request.user %}
+                            <a class="btn btn-primary btn-lg btn-block mb-3" href="{% url 'profile-edit' %}">
+                                Edit Profile
+                            </a>
+                            <a class="btn btn-primary btn-lg btn-block mb-3" href="{% url 'password_change' %}">
+                                Change Password
+                            </a>
+                            <a class="btn btn-danger btn-lg btn-block mb-3" href="{% url 'profile-delete' %}"
+                               onclick="return confirm('Are you sure you want to delete your profile? This action cannot be undone.');">
+                                <i class="fas fa-trash-alt"></i> Delete Profile
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

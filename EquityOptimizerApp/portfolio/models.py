@@ -14,11 +14,11 @@ class Portfolio(CreatedAtMixin, UpdatedAtMixin):
     name = models.CharField(max_length=100, validators=[MinLengthValidator(2)])
     description = models.TextField(blank=True, null=True)
     stocks = models.ManyToManyField('equity_optimizer.Stock', through='PortfolioStock', related_name='portfolios')
+    public = models.BooleanField(default=False, null=True)
 
     objects = PortfolioManager()
 
     def clean(self):
-        # Ensure the portfolio has between 5 and 50 stocks
         if self.pk:  # Only check if the portfolio already exists
             num_stocks = self.stocks.count()
             if num_stocks < 5:
@@ -27,7 +27,7 @@ class Portfolio(CreatedAtMixin, UpdatedAtMixin):
                 raise ValidationError('A portfolio can contain a maximum of 50 stocks.')
 
     def save(self, *args, **kwargs):
-        self.clean()  # Ensure validation is run before saving
+        self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -50,6 +50,7 @@ class PortfolioValueHistory(CreatedAtMixin, UpdatedAtMixin):
     portfolio = models.ForeignKey('portfolio.Portfolio', on_delete=models.CASCADE, related_name='value_history')
     date = models.DateField(default=timezone.now)
     value = models.FloatField()
+    daily_return = models.FloatField(null=True, blank=True)
 
     class Meta:
         unique_together = ('portfolio', 'date')

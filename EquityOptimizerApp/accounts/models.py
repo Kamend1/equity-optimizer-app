@@ -18,4 +18,4 @@ class Profile(models.Model):
     age = models.IntegerField(null=True, blank=True)
     investor_level = models.CharField(max_length=30, choices=InvestorLevelChoices.choices, null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
-    user = models.ForeignKey(to=UserModel, on_delete=models.CASCADE)
+    user = models.OneToOneField(to=UserModel, on_delete=models.CASCADE, related_name='profile')

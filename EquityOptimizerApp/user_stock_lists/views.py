@@ -33,7 +33,8 @@ def stock_search(request):
     query = request.GET.get('q', '')
     if query:
         stocks = Stock.objects.filter(
-            Q(ticker__icontains=query) | Q(name__icontains=query)
+            delisted=False and
+            (Q(ticker__icontains=query) | Q(name__icontains=query))
         )[:50]
         results = [{'id': stock.id, 'text': f"{stock.ticker} - {stock.name}"} for stock in stocks]
         return JsonResponse({'results': results})

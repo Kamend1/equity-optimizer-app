@@ -3,19 +3,61 @@
 {% block title %}Portfolio Detail{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>{{ portfolio.name }}</h2>
-    <p>{{ portfolio.description }}</p>
-    <h4>Total Value: ${{ portfolio_value }}</h4>
-    
-    <h5>Stocks in Portfolio:</h5>
-    <ul class="list-group">
-        {% for portfolio_stock in portfolio.portfoliostock_set.all %}
-            <li class="list-group-item">
-                {{ portfolio_stock.stock.name }} - {{ portfolio_stock.quantity }} shares
-                (Current Price: ${{ portfolio_stock.stock.current_price }})
-            </li>
-        {% endfor %}
-    </ul>
-</div>
+    <div class="container mt-5">
+        <div class="card shadow-lg rounded-lg">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">{{ portfolio.name }}</h2>
+            </div>
+            <div class="card-body">
+                <!-- Portfolio Description -->
+                <p class="lead">{{ portfolio.description }}</p>
+
+                <!-- Portfolio User Profile Link -->
+                <p><strong>Owner:</strong> <a href="{{ user_profile_link }}">{{ portfolio.user.get_full_name }}</a></p>
+
+                <!-- Latest Portfolio Value -->
+                {% if latest_value %}
+                    <p><strong>Latest Value:</strong> ${{ latest_value|floatformat:2 }} (as of {{ latest_value_date }})
+                    </p>
+                {% else %}
+                    <p class="text-muted">No recorded portfolio value yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Stock List in Portfolio -->
+        <div class="card mt-4 shadow-lg rounded-lg">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Stocks in Portfolio</h5>
+            </div>
+            <div class="card-body p-4">
+                <ul class="list-group">
+                    {% for stock in stock_details %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ stock.name }} ({{ stock.ticker }})</strong> - {{ stock.quantity }} shares
+                            </div>
+                            <span class="badge badge-info badge-pill">
+                            Last Close: ${{ stock.last_close|floatformat:2 }}
+                        </span>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-center">No stocks in this portfolio.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation Button -->
+        <div class="text-center mt-4">
+            <a href="{% url 'portfolio' %}" class="btn btn-secondary btn-lg rounded-pill">
+                <i class="fas fa-arrow-left"></i> Back to Portfolios
+            </a>
+        </div>
+    </div>
+
+    <!-- Include Bootstrap and FontAwesome from CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

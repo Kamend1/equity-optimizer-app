@@ -31,11 +31,12 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'profile'
 
     def get_object(self, queryset=None):
-        return self.request.user.profile_set.first()
+        return get_object_or_404(Profile, user_id=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user'] = self.request.user
+        profile = self.get_object()
+        context['user'] = profile.user
         return context
 
 
