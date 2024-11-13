@@ -144,7 +144,6 @@ class PortfolioEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 def update_portfolios_view(request):
     if request.method == 'POST':
         try:
-            # Call the function to update daily portfolio values for all portfolios
             update_all_portfolios_daily_values()
             messages.success(request, 'Portfolio values updated successfully!')
         except Exception as e:
@@ -152,7 +151,6 @@ def update_portfolios_view(request):
 
         return redirect('update_portfolios')  # Ensure 'update_portfolios' is defined in your URL configurations
 
-    # Render the update page if the request method is GET
     return render(request, 'portfolio/update_portfolios.html')
 
 

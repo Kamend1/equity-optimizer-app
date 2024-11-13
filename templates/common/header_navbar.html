@@ -6,59 +6,89 @@
         <a class="navbar-brand" href="{% url 'landing' %}">
             <!-- Site Logo -->
             <img src="{% static 'images/logo.png' %}" alt="Site Logo" style="height: 40px;">
-            <span class="ml-2">Stock Portfolio App Home</span>
+            <span class="ml-2">Stock Portfolio App</span>
         </a>
 
-        <!-- Superuser "Update Stocks" Button -->
+        <!-- Admin "Update Stocks" and "Update Portfolios" Links -->
         {% if user.is_staff %}
-            <a href="{% url 'update_stocks' %}" class="btn btn-outline-light ml-3">Update Stocks</a>
-        {% endif %}
-        {% if user.is_staff %}
-            <a href="{% url 'update_portfolios' %}" class="btn btn-outline-light ml-3">Update Portfolios</a>
+            <a href="{% url 'update_stocks' %}" class="nav-link text-light ml-3">
+                <i class="fas fa-sync-alt"></i> Update Stocks
+            </a>
+            <a href="{% url 'update_portfolios' %}" class="nav-link text-light ml-3">
+                <i class="fas fa-sync-alt"></i> Update Portfolios
+            </a>
         {% endif %}
 
+        <!-- Toggler for Mobile View -->
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    <a class="nav-link" href="{% url 'home' %}">
+                        <i class="fas fa-home"></i> Home
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'about' %}">About</a>
+                    <a class="nav-link" href="{% url 'about' %}">
+                        <i class="fas fa-info-circle"></i> About
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'stock_list' %}">Stocks</a>
+                    <a class="nav-link" href="{% url 'stock_list' %}">
+                        <i class="fas fa-chart-line"></i> Stocks
+                    </a>
                 </li>
+
+                <!-- Public "Currencies" Link -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'currency-list' %}">
+                        <i class="fas fa-dollar-sign"></i> Currencies
+                    </a>
+                </li>
+
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'profile_details' request.user.profile.pk %}">My Profile</a>
-                    </li>
-                        
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'stock_lists' %}">My Favorites</a>
+                        <a class="nav-link" href="{% url 'profile_details' request.user.profile.pk %}">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'portfolio' %}">Portfolio</a>
+                        <a class="nav-link" href="{% url 'stock_lists' %}">
+                            <i class="fas fa-star"></i> My Favorites
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'simulation' %}">Simulation</a>
+                        <a class="nav-link" href="{% url 'portfolio' %}">
+                            <i class="fas fa-briefcase"></i> Portfolio
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+                        <a class="nav-link" href="{% url 'simulation' %}">
+                            <i class="fas fa-play-circle"></i> Simulation
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contact' %}">
+                            <i class="fas fa-envelope"></i> Contact
+                        </a>
                     </li>
                     <li class="nav-item">
                         <form action="{% url 'logout' %}" method="post" class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-light">Logout</button>
+                            <button type="submit" class="btn btn-outline-light">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
                         </form>
                     </li>
                 {% else %}
-
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
                     </li>
                 {% endif %}
             </ul>

@@ -3,74 +3,100 @@
 {% block title %}About Us{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <!-- Title Section -->
-    <div class="row">
-        <div class="col-md-12 text-center">
-            <h2 class="mb-4">About Our App</h2>
-            <p class="lead">Empowering you with tools for optimizing your stock portfolio using advanced financial models.</p>
+    <div class="container my-5">
+        <!-- Title Section -->
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2 class="mb-4"><i class="fas fa-info-circle"></i> About Our App</h2>
+                <p class="lead">Empowering you with tools for optimizing your stock portfolio using advanced financial
+                    models.</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Mission Statement -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card shadow-lg rounded-lg p-4 mb-5">
-                <h3 class="text-center mb-3">Our Mission</h3>
-                <p class="text-center text-muted">Our mission is to democratize access to advanced financial tools and empower individuals to better understand the complexities of portfolio optimization, all in an easy-to-use and accessible platform.</p>
+        <!-- Mission Section -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card shadow-lg rounded-lg p-4 mb-5">
+                    <h3 class="text-center mb-3"><i class="fas fa-bullseye"></i> Our Mission</h3>
+                    <p class="text-center text-muted">Our mission is to democratize access to advanced financial tools
+                        and empower individuals to better understand the complexities of portfolio optimization, all in
+                        an easy-to-use and accessible platform.</p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- What We Do Section -->
-    <div class="row mt-5">
-        <div class="col-lg-6">
-            <div class="card shadow-sm rounded-lg p-4">
-                <h3>What We Do</h3>
-                <p>Our app provides a comprehensive platform for investors to download and analyze stock data, and construct optimal portfolios using the Harry Markowitz Efficient Frontier model. With a focus on educational and testing purposes, our tool offers insights into portfolio optimization, helping you understand the principles of modern portfolio theory.</p>
+        <!-- What We Do Section -->
+        <div class="row mt-5 align-items-center">
+            <div class="col-lg-6">
+                <div class="card shadow-sm rounded-lg p-4">
+                    <h3><i class="fas fa-chart-line"></i> What We Do</h3>
+                    <p>Our platform provides a comprehensive tool for investors and finance enthusiasts to access and
+                        analyze stock data using the free Yahoo Finance API. Users can create unlimited favorite stock
+                        lists, organizing their chosen stocks into customized collections. At the core of the
+                        application is the <strong>simulation feature</strong>, capable of running up to <strong>20,000
+                            simulations</strong> on a range of date intervals, starting from January 1st, 2010, to the
+                        present. Utilizing the Harry Markowitz Efficient Frontier model, the simulation offers a
+                        practical introduction to modern portfolio theory, helping users explore the principles of
+                        diversification and optimal portfolio construction.</p>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{% static 'images/about_image.jpg' %}" class="img-fluid rounded shadow-sm"
+                     alt="Portfolio Optimization">
             </div>
         </div>
-        <div class="col-lg-6">
-            <img src="/static/images/about_image.jpg" class="img-fluid rounded shadow-sm" alt="Portfolio Optimization">
-        </div>
-    </div>
 
-    <!-- Steps Section -->
-    <div class="row mt-5">
-        <div class="col-md-4">
-            <div class="card text-center shadow-sm rounded-lg p-4">
-                <i class="bi bi-download fa-3x text-primary mb-3"></i>
-                <h4>Step 1: Download Stock Data</h4>
-                <p>Using free data from <strong>yfinance</strong>, our app allows you to download historical stock prices for your chosen companies. Simply enter the stock symbols, and the app will retrieve the relevant data for analysis.</p>
+        <!-- Steps Section -->
+        <div class="row mt-5">
+            <!-- Step 1: Retrieve Stock Data -->
+            <div class="col-md-4">
+                <div class="card text-center shadow-sm rounded-lg p-4">
+                    <i class="fas fa-download fa-3x text-primary mb-3"></i>
+                    <h4>Step 1: Retrieve Stock Data</h4>
+                    <p>Leverage our integration with the free <strong>Yahoo Finance API</strong> to access historical
+                        stock data. Simply enter the ticker symbols of your preferred companies, and the app will
+                        download comprehensive price data for analysis, dating back to January 1st, 2010.</p>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center shadow-sm rounded-lg p-4">
-                <i class="bi bi-calculator fa-3x text-primary mb-3"></i>
-                <h4>Step 2: Calculate Optimal Portfolio</h4>
-                <p>Our app utilizes the <strong>Harry Markowitz Efficient Frontier</strong> model to help you calculate the optimal portfolio. By analyzing the risk-return trade-offs, the app suggests the best combination of stocks to maximize returns for a given level of risk.</p>
-                <p>Create multiple lists of favorite stocks, each list containing between 5 and 50 stocks. Simulate portfolios using our Simulation function to create optimal portfolios.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center shadow-sm rounded-lg p-4">
-                <i class="bi bi-bar-chart-line fa-3x text-primary mb-3"></i>
-                <h4>Step 3: Track Your Portfolio</h4>
-                <p>Track your portfolio's performance over time, making it easier to monitor your investments and make informed decisions.</p>
-            </div>
-        </div>
-    </div>
 
-    <!-- Disclaimer Section -->
-    <div class="row mt-5">
-        <div class="col-md-12">
-            <div class="alert alert-warning shadow-sm rounded-lg p-4">
-                <h4 class="alert-heading">Important Disclaimer</h4>
-                <p>This app is intended for educational and testing purposes only. It does not provide investment advice and should not be used as a sole source for making investment decisions. The developers and creators of this app are not responsible for any financial losses incurred as a result of using the app.</p>
-                <hr>
-                <p class="mb-0">Always consult with a qualified financial advisor before making any investment decisions.</p>
+            <!-- Step 2: Run Simulations for Optimal Portfolios -->
+            <div class="col-md-4">
+                <div class="card text-center shadow-sm rounded-lg p-4">
+                    <i class="fas fa-calculator fa-3x text-primary mb-3"></i>
+                    <h4>Step 2: Run Simulations for Optimal Portfolios</h4>
+                    <p>Utilize the powerful <strong>Harry Markowitz Efficient Frontier</strong> model to explore the
+                        risk-return balance of your chosen stocks. Create lists of favorite stocks with up to 50 tickers
+                        each, and use our advanced simulation feature to run up to 20,000 scenarios, helping you
+                        determine the most efficient portfolio based on historical data and risk preferences.</p>
+                </div>
+            </div>
+
+            <!-- Step 3: Monitor and Analyze Your Portfolio -->
+            <div class="col-md-4">
+                <div class="card text-center shadow-sm rounded-lg p-4">
+                    <i class="fas fa-chart-bar fa-3x text-primary mb-3"></i>
+                    <h4>Step 3: Monitor and Analyze Your Portfolio</h4>
+                    <p>Keep track of your portfolio's performance over time with detailed analytics and historical value
+                        tracking. Monitor daily returns and analyze trends, enabling you to make informed, data-driven
+                        decisions and optimize your investment strategy as market conditions evolve.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disclaimer Section -->
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <div class="alert alert-warning shadow-sm rounded-lg p-4">
+                    <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Important Disclaimer</h4>
+                    <p>This app is intended for educational and testing purposes only. It does not provide investment
+                        advice and should not be used as a sole source for making investment decisions. The developers
+                        and creators of this app are not responsible for any financial losses incurred as a result of
+                        using the app.</p>
+                    <hr>
+                    <p class="mb-0">Always consult with a qualified financial advisor before making any investment
+                        decisions.</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

@@ -2,7 +2,7 @@ from django.core.validators import MinLengthValidator
 from django.db import models
 from django.utils import timezone
 from EquityOptimizerApp.mixins import CreatedAtMixin, UpdatedAtMixin
-from EquityOptimizerApp.equity_optimizer.managers import PortfolioManager
+from EquityOptimizerApp.portfolio.managers import PortfolioManager
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from EquityOptimizerApp.equity_optimizer.models import Stock
@@ -39,8 +39,10 @@ class PortfolioStock(models.Model):
     stock = models.ForeignKey('equity_optimizer.Stock', on_delete=models.CASCADE, related_name='portfolio_stocks')
     quantity = models.FloatField()
 
+    objects = PortfolioManager()
+
     class Meta:
-        unique_together = ('portfolio', 'stock')  # Ensure a stock can only be in a portfolio once
+        unique_together = ('portfolio', 'stock')
 
     def __str__(self):
         return f"{self.stock.ticker} - {self.quantity} shares in {self.portfolio.name}"
@@ -55,7 +57,7 @@ class PortfolioValueHistory(CreatedAtMixin, UpdatedAtMixin):
     class Meta:
         unique_together = ('portfolio', 'date')
         indexes = [
-            models.Index(fields=['portfolio', 'date']),  # Composite index for efficient queries
+            models.Index(fields=['portfolio', 'date']),
         ]
 
     def __str__(self):

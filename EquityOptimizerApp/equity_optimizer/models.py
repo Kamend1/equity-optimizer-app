@@ -14,6 +14,7 @@ class Stock(models.Model):
     website = models.URLField(blank=True, null=True)
     logo_url = models.URLField(blank=True, null=True)
     delisted = models.BooleanField(default=False)
+    currency_code = models.CharField(max_length=3, default='USD', blank=False, null=False)
 
     # Market Data
     market_cap = models.BigIntegerField(blank=True, null=True)
@@ -69,7 +70,7 @@ class Stock(models.Model):
     # Analyst Recommendations
     recommendations = models.JSONField(blank=True, null=True)
 
-    objects = models.Manager()
+    objects = StockManager()
 
     def last_adj_close(self):
         last_stock_data = self.historical_data.order_by('-date').first()
@@ -90,6 +91,7 @@ class StockData(CreatedAtMixin, UpdatedAtMixin, models.Model):
     volume = models.BigIntegerField()
     daily_return = models.FloatField(null=True, blank=True)
     trend = models.CharField(max_length=50, null=True, blank=True)
+    adj_close_to_usd = models.FloatField(blank=True, null=True)
 
     objects = StockDataManager()
 
@@ -104,5 +106,5 @@ class StockData(CreatedAtMixin, UpdatedAtMixin, models.Model):
     class Meta:
         unique_together = ('stock', 'date')
         indexes = [
-            Index(fields=['stock', 'date']),  # Composite index on stock and date
+            Index(fields=['stock', 'date']),
         ]

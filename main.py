@@ -1,5 +1,5 @@
-# import yfinance as yf
-# import pandas as pd
+import yfinance as yf
+import pandas as pd
 #
 # # Set the ticker symbol for testing
 # ticker_symbol = "AAPL"  # Change this to test different tickers
@@ -43,3 +43,11 @@
 # from EquityOptimizerApp.equity_optimizer.services import StockUpdateService
 #
 # StockUpdateService.update_stock_data_trend_daily_return('2024-11-08')
+
+# ticker = 'SU.PA'
+# stock_data = yf.Ticker(ticker)
+# info = stock_data.info
+#
+# print(info['currency'])
+
+

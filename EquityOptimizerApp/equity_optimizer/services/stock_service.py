@@ -44,7 +44,8 @@ class StockService:
         ex_dividend_date = parse_date(info.get('exDividendDate'))
         last_dividend_date = parse_date(info.get('lastDividendDate'))
 
-        # Create or update the Stock instance
+        currency_code = info.get('currency', 'USD')
+
         stock = Stock.objects.create(
             ticker=ticker,
             name=info.get('shortName', ''),
@@ -52,6 +53,7 @@ class StockService:
             industry=info.get('industry', ''),
             website=info.get('website', ''),
             logo_url=info.get('logo_url', ''),
+            currency_code=currency_code,
 
             # Market Data
             market_cap=info.get('marketCap'),

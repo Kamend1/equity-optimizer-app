@@ -47,7 +47,9 @@ INSTALLED_APPS = [
     'EquityOptimizerApp.portfolio',
     'EquityOptimizerApp.common',
     'EquityOptimizerApp.accounts',
-    'EquityOptimizerApp.user_stock_lists'
+    'EquityOptimizerApp.user_stock_lists',
+    'EquityOptimizerApp.currencies',
+
 ]
 
 MIDDLEWARE = [

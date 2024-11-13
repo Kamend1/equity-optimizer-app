@@ -16,25 +16,6 @@ stock_data_service = StockDataService(fetcher)
 class StockUpdateService:
 
     @staticmethod
-    def update_stock_data_trend_daily_return(date):
-
-        queryset = StockData.objects.filter(date__gt=date)
-        stock_data_objects = []
-
-        for stock_data in queryset:
-            daily_return = StockData.objects.calculate_daily_return(
-                stock=stock_data.stock,
-                date=stock_data.date,
-                adj_close=stock_data.adj_close,
-            )
-
-            stock_data.daily_return = daily_return
-            stock_data.trend = StockData.objects.calculate_trend(daily_return)
-            stock_data_objects.append(stock_data)
-        StockData.objects.bulk_update(stock_data_objects, fields=['daily_return', 'trend'])
-        return stock_data_objects
-
-    @staticmethod
     def update_stock_data():
         stocks = stock_service.get_all_listed_stocks()
         stock_objects = []
@@ -52,9 +33,6 @@ class StockUpdateService:
                 except Exception as e:
                     print(f"No stock info available for {stock.ticker}. Skipping further processing.")
                     continue
-
-                ex_dividend_date = parse_date(info.get('exDividendDate'))
-                last_dividend_date = parse_date(info.get('lastDividendDate'))
 
                 stock_objects.append(
                     Stock(
@@ -144,7 +122,7 @@ class StockUpdateService:
 
         print(start_date, min_date, formatted_date)
         stock_data_objects = stock_data_service.download_and_save_stock_data(stocks, formatted_date)
-        StockUpdateService.update_stock_data_trend_daily_return(formatted_date)
+        stock_data_service.update_stock_data_trend_daily_return(formatted_date)
 
         with transaction.atomic():
             Stock.objects.bulk_update(

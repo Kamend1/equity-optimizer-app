@@ -2,6 +2,7 @@ import pandas as pd
 from django.db import transaction
 from django.db.models import Count
 
+from EquityOptimizerApp.currencies.models import ExchangeRate
 from EquityOptimizerApp.equity_optimizer.models import StockData
 from EquityOptimizerApp.equity_optimizer.services import DataFetcher, StockService
 from EquityOptimizerApp.equity_optimizer.utils import percentage_return_classifier
@@ -13,6 +14,15 @@ class StockDataService:
 
     def download_and_save_stock_data(self, stock_list, start_date='2010-01-01', interval='1d'):
         stock_data_objects = []
+        update_stock_data_objects = []
+        existing_records_set = set()
+
+        for stock in stock_list:
+            existing_dates = StockData.objects.filter(stock=stock).values_list('stock_id', 'date')
+            existing_records_set.update(existing_dates)
+
+        print(f"Debug: Found {len(existing_records_set)} existing records in the database.")
+
         for stock in stock_list:
             try:
                 data = self.fetcher.download_historical_data(stock.ticker, start_date)
@@ -21,18 +31,36 @@ class StockDataService:
                 continue
 
             if data.empty:
-                raise ValueError("No historical data returned for the given ticker.")
+                print(f"Warning: No data returned for {stock.ticker}. Skipping.")
+                continue
 
             data['daily_return'] = data['Adj Close'].pct_change() * 100
             data['trend'] = data['daily_return'].apply(percentage_return_classifier)
-            with pd.option_context('future.no_silent_downcasting', True):
-                data.infer_objects(copy=False).fillna(0)
             data.reset_index(inplace=True)
 
-            stock_data_objects.extend([
-                StockData(
+            for _, row in data.iterrows():
+                date_value = pd.to_datetime(row['Date']).date()
+                record_key = (stock.id, date_value)
+
+                # Fetch the exchange rate if the currency is not USD
+                if stock.currency_code != 'USD':
+                    exchange_rate = (
+                        ExchangeRate.objects.filter(
+                            base_currency__code='USD',
+                            target_currency__code=stock.currency_code,
+                            date=date_value,
+                        ).first()
+                    )
+                    if exchange_rate:
+                        adj_close_to_usd = row['Adj Close'] / exchange_rate.rate
+                    else:
+                        adj_close_to_usd = None  # Fallback if no exchange rate is found
+                else:
+                    adj_close_to_usd = row['Adj Close']
+
+                record = StockData(
                     stock=stock,
-                    date=row['Date'],
+                    date=date_value,
                     open=row['Open'],
                     high=row['High'],
                     low=row['Low'],
@@ -40,15 +68,36 @@ class StockDataService:
                     adj_close=row['Adj Close'],
                     volume=row['Volume'],
                     daily_return=row['daily_return'],
-                    trend=row['trend']
+                    trend=row['trend'],
+                    adj_close_to_usd=adj_close_to_usd,
                 )
-                for _, row in data.iterrows()
-            ])
+
+                if record_key in existing_records_set:
+                    update_stock_data_objects.append(record)
+                else:
+                    stock_data_objects.append(record)
+
+        print(f"Debug: Preparing to bulk update {len(update_stock_data_objects)} records.")
+        print(f"Debug: Preparing to bulk create {len(stock_data_objects)} records.")
 
         with transaction.atomic():
-            StockData.objects.bulk_create(stock_data_objects, batch_size=1000)
+            if update_stock_data_objects:
+                fields_to_update = ['date', 'open', 'high', 'low', 'close', 'adj_close', 'volume', 'daily_return',
+                                    'trend', 'adj_close_to_usd']
+                try:
+                    StockData.objects.bulk_update(update_stock_data_objects, fields=fields_to_update, batch_size=1000)
+                    print(f"Debug: Successfully updated {len(update_stock_data_objects)} records.")
+                except Exception as e:
+                    print(f"Error during bulk_update: {e}")
 
-        return stock_data_objects
+            if stock_data_objects:
+                try:
+                    StockData.objects.bulk_create(stock_data_objects, batch_size=1000)
+                    print(f"Debug: Successfully created {len(stock_data_objects)} records.")
+                except Exception as e:
+                    print(f"Error during bulk_create: {e}")
+
+        return stock_data_objects + update_stock_data_objects
 
     @staticmethod
     def fetch_stock_data(stock_symbols, start_date='2010-01-01', end_date=None):

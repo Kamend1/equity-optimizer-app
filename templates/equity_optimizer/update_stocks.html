@@ -3,21 +3,33 @@
 {% block title %}Update Stocks{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Update Stock Data</h2>
-    <p>Click the button below to update stock data from the financial API.</p>
-    
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary">Update Stock Data</button>
-    </form>
-
-    {% if messages %}
-        <div class="mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-            {% endfor %}
+    <div class="container my-5">
+        <!-- Card Container -->
+        <div class="card shadow-lg rounded-lg p-4">
+            <div class="card-body text-center">
+                <i class="fas fa-database fa-3x text-primary mb-3"></i>
+                <h2 class="mb-4">Update Stock Data</h2>
+                <p class="text-muted mb-4">
+                    Click the button below to update stock data from the financial API.
+                </p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">
+                        <i class="fas fa-sync"></i> Update Stock Data
+                    </button>
+                </form>
+            </div>
         </div>
-    {% endif %}
-</div>
+
+        <!-- Alert Messages -->
+        {% if messages %}
+            <div class="mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} rounded-pill shadow-sm">
+                        <i class="fas fa-info-circle"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

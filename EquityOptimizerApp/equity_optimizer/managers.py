@@ -20,12 +20,6 @@ class StockManager(models.Manager):
         last_stock_data = self.historical_data.order_by('-date').first()
         return float(last_stock_data.adj_close) if last_stock_data else 0
 
-
-class PortfolioManager(models.Manager):
-
-    def calculate_value(self):
-        total_value = 0
-        for portfolio_stock in self.portfolio_stocks.all():
-            stock_price = portfolio_stock.stock.get_latest_price()  # Implement this method in Stock model
-            total_value += stock_price * portfolio_stock.quantity
-        return total_value
+    def get_last_adj_close_to_usd(self):
+        last_adj_close_to_usd = self.historical_data.order_by('-date').first()
+        return float(last_adj_close_to_usd)

@@ -3,9 +3,24 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<div class="jumbotron text-center">
-    <h1>Welcome to the Stock Portfolio App</h1>
-    <p>Analyze and optimize your stock portfolio with ease.</p>
-    <a class="btn btn-primary btn-lg" href="{% url 'stock_list' %}" role="button">Get Started</a>
-</div>
+    <div class="container my-5">
+        <!-- Card Container -->
+        <div class="card shadow-lg rounded-lg p-5 text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-pie fa-4x text-primary mb-4"></i>
+                <h1 class="mb-4">Welcome to the Stock Portfolio App</h1>
+                <p class="lead text-muted mb-4">
+                    Analyze and optimize your stock portfolio effortlessly using our advanced financial tools.
+                    Explore a wide range of features designed to help you make data-driven investment decisions.
+                </p>
+                <a class="btn btn-primary btn-lg rounded-pill" href="{% url 'stock_list' %}" role="button">
+                    <i class="fas fa-play-circle"></i> Get Started
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include FontAwesome if not already included -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
+

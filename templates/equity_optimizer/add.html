@@ -1,20 +1,53 @@
 {% extends 'common/base.html' %}
+{% load static %}
+
+{% block title %}Add Stock{% endblock %}
 
 {% block content %}
-    <h1>Add Stock</h1>
+    <div class="container my-5">
+        <div class="card shadow-lg rounded-lg">
+            <div class="card-header bg-primary text-white text-center rounded-top">
+                <h2>
+                    <i class="fas fa-plus-circle me-2"></i> Add New Stock
+                </h2>
+            </div>
 
-    {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
+            <div class="card-body">
+                <!-- Messages Section -->
+                {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} rounded-pill">
+                                <i class="fas fa-info-circle me-2"></i>{{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Form Section -->
+                <form method="POST" class="p-3">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="ticker" class="form-label"><strong>Ticker Symbol:</strong></label>
+                        <input type="text" id="ticker" name="ticker" class="form-control form-control-lg rounded-pill"
+                               placeholder="Enter stock ticker symbol (e.g., AAPL)" value="{{ ticker }}" required>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success btn-lg rounded-pill">
+                            <i class="fas fa-check-circle"></i> Add Stock
+                        </button>
+                        <a href="{% url 'stock_list' %}" class="btn btn-secondary btn-lg rounded-pill ms-3">
+                            <i class="fas fa-arrow-left"></i> Back to Stock List
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
-    {% endif %}
+    </div>
 
-    <form method="POST">
-        {% csrf_token %}
-        <label for="ticker">Ticker Symbol:</label>
-        <input type="text" id="ticker" name="ticker" value="{{ ticker }}" required>
-        <button type="submit">Add Stock</button>
-    </form>
+    <!-- Include Bootstrap and FontAwesome from CDN if not already included -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

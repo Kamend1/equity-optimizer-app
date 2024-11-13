@@ -142,4 +142,3 @@ def generate_color_string(r, g, b, a=1.0):
         str: RGBA color string.
     """
     return f'rgba({r}, {g}, {b}, {a})'
-

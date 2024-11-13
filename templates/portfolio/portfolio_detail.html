@@ -1,24 +1,28 @@
 {% extends 'common/base.html' %}
+{% load humanize %}
 
 {% block title %}Portfolio Detail{% endblock %}
 
 {% block content %}
-    <div class="container mt-5">
+    <div class="container my-5">
+        <!-- Portfolio Card -->
         <div class="card shadow-lg rounded-lg">
-            <div class="card-header bg-primary text-white">
-                <h2 class="mb-0">{{ portfolio.name }}</h2>
+            <div class="card-header bg-primary text-white rounded-top">
+                <h2 class="mb-0">
+                    <i class="fas fa-briefcase me-2"></i> {{ portfolio.name }}
+                </h2>
             </div>
             <div class="card-body">
                 <!-- Portfolio Description -->
                 <p class="lead">{{ portfolio.description }}</p>
 
-                <!-- Portfolio User Profile Link -->
+                <!-- Portfolio Owner Link -->
                 <p><strong>Owner:</strong> <a href="{{ user_profile_link }}">{{ portfolio.user.get_full_name }}</a></p>
 
                 <!-- Latest Portfolio Value -->
                 {% if latest_value %}
-                    <p><strong>Latest Value:</strong> ${{ latest_value|floatformat:2 }} (as of {{ latest_value_date }})
-                    </p>
+                    <p><strong>Latest Value:</strong> ${{ latest_value|floatformat:2|intcomma }} (as
+                        of {{ latest_value_date }})</p>
                 {% else %}
                     <p class="text-muted">No recorded portfolio value yet.</p>
                 {% endif %}
@@ -27,19 +31,23 @@
 
         <!-- Stock List in Portfolio -->
         <div class="card mt-4 shadow-lg rounded-lg">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0">Stocks in Portfolio</h5>
+            <div class="card-header bg-secondary text-white rounded-top">
+                <h5 class="mb-0"><i class="fas fa-list-ul me-2"></i> Stocks in Portfolio</h5>
             </div>
             <div class="card-body p-4">
                 <ul class="list-group">
                     {% for stock in stock_details %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
-                                <strong>{{ stock.name }} ({{ stock.ticker }})</strong>
+                                <strong>
+                                    <a href="{% url 'stock_detail' stock.ticker %}">
+                                        <i class="fas fa-chart-bar me-2"></i>{{ stock.name }} ({{ stock.ticker }})
+                                    </a>
+                                </strong>
                                 - {{ stock.quantity|floatformat:2 }} shares
                             </div>
-                            <span class="badge badge-info badge-pill">
-                            Last Close: ${{ stock.last_close|floatformat:2 }}
+                            <span class="badge bg-info text-dark rounded-pill">
+                            Last Close: ${{ stock.last_close|intcomma|floatformat:2 }}
                         </span>
                         </li>
                     {% empty %}
@@ -49,13 +57,13 @@
             </div>
         </div>
 
-        <!-- Navigation Buttons -->
-        <div class="text-center mt-4">
+        <!-- Action Buttons -->
+        <div class="text-center mt-4 d-flex flex-column gap-3">
+            <!-- View Value History Button -->
             <a href="{% url 'portfolio-value-history' portfolio.id %}" class="btn btn-info btn-lg rounded-pill">
                 <i class="fas fa-chart-line"></i> View Value History
             </a>
-        </div>
-        <div class="text-center mt-4">
+
             <!-- Edit Portfolio Button -->
             <a href="{% url 'portfolio-edit' portfolio.id %}" class="btn btn-primary btn-lg rounded-pill">
                 <i class="fas fa-edit"></i> Edit Portfolio
