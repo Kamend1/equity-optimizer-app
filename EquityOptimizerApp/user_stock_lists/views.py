@@ -41,7 +41,7 @@ def stock_search(request):
     return JsonResponse({'results': []})
 
 
-class UserListsMain(ListView, LoginRequiredMixin, UserPassesTestMixin):
+class UserListsMain(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = FavoriteStockList
     template_name = 'user_stock_lists/user_stock_lists.html'
     context_object_name = 'lists'
@@ -58,7 +58,7 @@ class UserListsMain(ListView, LoginRequiredMixin, UserPassesTestMixin):
         return self.model.objects.filter(user=self.request.user)
 
 
-class UserListsDeleteView(DeleteView, LoginRequiredMixin, UserPassesTestMixin):
+class UserListsDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = FavoriteStockList
     success_url = reverse_lazy('stock_lists')
     template_name = 'user_stock_lists/user_stock_list_delete.html'
