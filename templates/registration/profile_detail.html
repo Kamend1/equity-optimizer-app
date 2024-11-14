@@ -5,60 +5,85 @@
 {% block content %}
     <div class="container my-5">
         <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
+            <div class="col-md-10 col-lg-8">
                 <div class="card shadow-lg rounded-lg">
-                    <div class="card-body">
-                        <h2 class="text-center mb-4">{{ profile.user.get_full_name }}</h2>
+                    <!-- Card Header with User's Name and Upvote Badge -->
+                    <div class="card-header bg-primary text-white text-center rounded-top">
+                        <h2 class="mb-0"><i class="fas fa-user me-2"></i>{{ profile.user.get_full_name }}</h2>
+                    </div>
 
-                        <!-- Profile Image -->
-                        <div class="text-center mb-4">
+                    <!-- Profile Image and Upvote Count -->
+                    <div class="card-body text-center">
+                        <!-- Profile Image Section -->
+                        <div class="mb-4">
                             {% if not profile.profile_image %}
                                 <img src="{% static 'images/no_profile_pic.jfif' %}"
                                      alt="Profile Image"
-                                     class="img-fluid rounded-circle"
-                                     style="max-width: 150px; height: 150px;">
+                                     class="img-fluid rounded-circle border border-primary"
+                                     style="max-width: 200px; height: 200px;">
                             {% else %}
                                 <img src="{{ profile.profile_image }}"
                                      alt="Profile Image"
-                                     class="img-fluid rounded-circle"
-                                     style="max-width: 150px; height: 150px;">
+                                     class="img-fluid rounded-circle border border-primary"
+                                     style="max-width: 200px; height: 200px;">
                             {% endif %}
                         </div>
 
-                        <!-- User Information -->
-                        <div class="mb-3">
-                            <p><strong>Username:</strong> <span>{{ profile.user.username }}</span></p>
-                        </div>
-                        <div class="mb-3">
-                            <p><strong>Email:</strong> <span>{{ profile.user.email }}</span></p>
-                        </div>
-                        <div class="mb-3">
-                            <p><strong>Profile Link:</strong>
-                                <a href="{{ profile.profile_link }}" target="_blank">{{ profile.profile_link }}</a>
-                            </p>
-                        </div>
-                        <div class="mb-3">
-                            <p><strong>Age:</strong> <span>{{ profile.age }}</span></p>
-                        </div>
-                        <div class="mb-3">
-                            <p><strong>Investor Level:</strong> <span>{{ profile.get_investor_level_display }}</span>
-                            </p>
-                        </div>
+                        <!-- Upvote Count Badge -->
                         <div class="mb-4">
-                            <p><strong>Bio:</strong> <span>{{ profile.bio }}</span></p>
+                            <span class="badge bg-success rounded-pill py-2 px-4">
+                                <i class="fas fa-thumbs-up me-1"></i> Total Upvotes: {{ profile.total_upvotes }}
+                            </span>
                         </div>
 
-                        <!-- Action Buttons only for the owner of the profile -->
+                        <!-- User Information Section -->
+                        <div class="row text-start">
+                            <div class="col-md-6 mb-3">
+                                <p><strong><i
+                                        class="fas fa-user-tag me-2"></i>Username:</strong> {{ profile.user.username }}
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> {{ profile.user.email }}
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p><strong><i class="fas fa-link me-2"></i>Profile Link:</strong>
+                                    <a href="{{ profile.profile_link }}" target="_blank">{{ profile.profile_link }}</a>
+                                </p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p><strong><i class="fas fa-birthday-cake me-2"></i>Age:</strong> {{ profile.age }}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <p><strong><i class="fas fa-chart-line me-2"></i>Investor
+                                    Level:</strong> {{ profile.get_investor_level_display }}</p>
+                            </div>
+                            <div class="col-12 mb-4">
+                                <p><strong><i class="fas fa-info-circle me-2"></i>Bio:</strong> {{ profile.bio }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons (Visible Only to Profile Owner) -->
                         {% if profile.user == request.user %}
-                            <a class="btn btn-primary btn-lg btn-block mb-3" href="{% url 'profile-edit' %}">
-                                Edit Profile
-                            </a>
-                            <a class="btn btn-primary btn-lg btn-block mb-3" href="{% url 'password_change' %}">
-                                Change Password
-                            </a>
-                            <a class="btn btn-danger btn-lg btn-block mb-3" href="{% url 'profile-delete' %}"
-                               onclick="return confirm('Are you sure you want to delete your profile? This action cannot be undone.');">
-                                <i class="fas fa-trash-alt"></i> Delete Profile
+                            <div class="d-flex flex-column gap-3 mb-4">
+                                <a href="{% url 'profile-edit' %}" class="btn btn-primary btn-lg rounded-pill">
+                                    <i class="fas fa-edit me-2"></i> Edit Profile
+                                </a>
+                                <a href="{% url 'password_change' %}" class="btn btn-primary btn-lg rounded-pill">
+                                    <i class="fas fa-key me-2"></i> Change Password
+                                </a>
+                                <a href="{% url 'profile-delete' %}"
+                                   class="btn btn-danger btn-lg rounded-pill"
+                                   onclick="return confirm('Are you sure you want to delete your profile? This action cannot be undone.');">
+                                    <i class="fas fa-trash-alt me-2"></i> Delete Profile
+                                </a>
+                            </div>
+                        {% else %}
+                            <!-- Link to User's Public Portfolios -->
+                            <a href="{% url 'public-portfolios' %}?user_id={{ profile.user.id }}"
+                               class="btn btn-outline-info btn-lg rounded-pill mb-4">
+                                <i class="fas fa-globe me-2"></i> View Public Portfolios
                             </a>
                         {% endif %}
                     </div>

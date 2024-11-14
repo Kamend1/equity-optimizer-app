@@ -33,8 +33,7 @@ def stock_search(request):
     query = request.GET.get('q', '')
     if query:
         stocks = Stock.objects.filter(
-            delisted=False and
-            (Q(ticker__icontains=query) | Q(name__icontains=query))
+            Q(delisted=False) & (Q(ticker__icontains=query) | Q(name__icontains=query))
         )[:50]
         results = [{'id': stock.id, 'text': f"{stock.ticker} - {stock.name}"} for stock in stocks]
         return JsonResponse({'results': results})
@@ -55,7 +54,7 @@ class UserListsMain(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return FavoriteStockList.objects.filter(id=list_id, user=self.request.user).exists()
 
     def get_queryset(self):
-        return self.model.objects.filter(user=self.request.user)
+        return self.model.objects.filter(user=self.request.user).order_by('pk')
 
 
 class UserListsDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

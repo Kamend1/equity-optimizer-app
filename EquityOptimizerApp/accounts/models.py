@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Count
 
 UserModel = get_user_model()
 
@@ -19,3 +20,6 @@ class Profile(models.Model):
     investor_level = models.CharField(max_length=30, choices=InvestorLevelChoices.choices, null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     user = models.OneToOneField(to=UserModel, on_delete=models.CASCADE, related_name='profile')
+
+    def total_upvotes(self):
+        return self.user.portfolios.filter(public=True).aggregate(total_upvotes=Count('upvotes'))['total_upvotes'] or 0

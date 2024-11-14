@@ -7,17 +7,29 @@
     <div class="container my-5">
         <!-- Portfolio Card -->
         <div class="card shadow-lg rounded-lg">
-            <div class="card-header bg-primary text-white rounded-top">
+            <div class="card-header bg-primary text-white rounded-top d-flex justify-content-between align-items-center">
                 <h2 class="mb-0">
                     <i class="fas fa-briefcase me-2"></i> {{ portfolio.name }}
                 </h2>
+                <!-- Portfolio Public/Private Badge -->
+                {% if portfolio.public %}
+                    <span class="badge bg-success text-uppercase">
+                        <i class="fas fa-globe me-1"></i> Public
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary text-uppercase">
+                        <i class="fas fa-lock me-1"></i> Private
+                    </span>
+                {% endif %}
             </div>
             <div class="card-body">
                 <!-- Portfolio Description -->
                 <p class="lead">{{ portfolio.description }}</p>
 
                 <!-- Portfolio Owner Link -->
-                <p><strong>Owner:</strong> <a href="{{ user_profile_link }}">{{ portfolio.user.get_full_name }}</a></p>
+                <p><strong>Owner:</strong> <a href="{{ user_profile_link }}"
+                                              class="text-decoration-none text-primary">{{ portfolio.user.get_full_name }}</a>
+                </p>
 
                 <!-- Latest Portfolio Value -->
                 {% if latest_value %}
@@ -40,39 +52,46 @@
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <strong>
-                                    <a href="{% url 'stock_detail' stock.ticker %}">
+                                    <a href="{% url 'stock_detail' stock.ticker %}"
+                                       class="text-decoration-none text-dark">
                                         <i class="fas fa-chart-bar me-2"></i>{{ stock.name }} ({{ stock.ticker }})
                                     </a>
                                 </strong>
                                 - {{ stock.quantity|floatformat:2 }} shares
                             </div>
                             <span class="badge bg-info text-dark rounded-pill">
-                            Last Close: ${{ stock.last_close|intcomma|floatformat:2 }}
-                        </span>
+                                Last Close: ${{ stock.last_close|intcomma|floatformat:2 }}
+                            </span>
                         </li>
                     {% empty %}
-                        <li class="list-group-item text-center">No stocks in this portfolio.</li>
+                        <li class="list-group-item text-center text-muted">
+                            <i class="fas fa-info-circle me-2"></i> No stocks in this portfolio.
+                        </li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
 
         <!-- Action Buttons -->
-        <div class="text-center mt-4 d-flex flex-column gap-3">
-            <!-- View Value History Button -->
-            <a href="{% url 'portfolio-value-history' portfolio.id %}" class="btn btn-info btn-lg rounded-pill">
-                <i class="fas fa-chart-line"></i> View Value History
-            </a>
+        <div class="text-center mt-4">
+            <div class="d-flex flex-column gap-3">
+                <!-- View Value History Button -->
+                <a href="{% url 'portfolio-value-history' portfolio.id %}" class="btn btn-info btn-lg rounded-pill">
+                    <i class="fas fa-chart-line"></i> View Value History
+                </a>
 
-            <!-- Edit Portfolio Button -->
-            <a href="{% url 'portfolio-edit' portfolio.id %}" class="btn btn-primary btn-lg rounded-pill">
-                <i class="fas fa-edit"></i> Edit Portfolio
-            </a>
+                <!-- Edit Portfolio Button -->
+                {% if portfolio.user == request.user %}
+                    <a href="{% url 'portfolio-edit' portfolio.id %}" class="btn btn-primary btn-lg rounded-pill">
+                        <i class="fas fa-edit"></i> Edit Portfolio
+                    </a>
+                {% endif %}
 
-            <!-- Back to Portfolios Button -->
-            <a href="{% url 'portfolio' %}" class="btn btn-secondary btn-lg rounded-pill">
-                <i class="fas fa-arrow-left"></i> Back to Portfolios
-            </a>
+                <!-- Back to Portfolios Button -->
+                <a href="{% url 'personal-portfolios' %}" class="btn btn-secondary btn-lg rounded-pill">
+                    <i class="fas fa-arrow-left"></i> Back to Portfolios
+                </a>
+            </div>
         </div>
     </div>
 

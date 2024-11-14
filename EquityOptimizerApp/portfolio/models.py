@@ -15,6 +15,7 @@ class Portfolio(CreatedAtMixin, UpdatedAtMixin):
     description = models.TextField(blank=True, null=True)
     stocks = models.ManyToManyField('equity_optimizer.Stock', through='PortfolioStock', related_name='portfolios')
     public = models.BooleanField(default=False, null=True)
+    upvotes_count = models.PositiveIntegerField(default=0)
 
     objects = PortfolioManager()
 
@@ -32,6 +33,14 @@ class Portfolio(CreatedAtMixin, UpdatedAtMixin):
 
     def __str__(self):
         return f"{self.name} ({self.user.username})"
+
+
+class PortfolioUpvote(CreatedAtMixin, UpdatedAtMixin, models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='upvotes')
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='upvotes')
+
+    class Meta:
+        unique_together = ('user', 'portfolio')
 
 
 class PortfolioStock(models.Model):

@@ -1,5 +1,9 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+from django.db.models import Count
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
@@ -7,26 +11,77 @@ from django.views.generic import UpdateView, DetailView, ListView
 
 from EquityOptimizerApp.equity_optimizer.forms import DateRangeForm
 from EquityOptimizerApp.mixins import ObjectOwnershipRequiredMixin
-from EquityOptimizerApp.portfolio.models import Portfolio, PortfolioStock, PortfolioValueHistory
+from EquityOptimizerApp.portfolio.models import Portfolio, PortfolioStock, PortfolioValueHistory, PortfolioUpvote
 from EquityOptimizerApp.portfolio.forms import PortfolioForm
-from EquityOptimizerApp.portfolio.services import save_portfolio_from_simulation, update_all_portfolios_daily_values
+from EquityOptimizerApp.portfolio.services import PortfolioCreationService, PortfolioValueService
+
+portfolio_creation_service = PortfolioCreationService()
+portfolio_value_service = PortfolioValueService()
+
+user_model = get_user_model()
+
+
+class PersonalPortfolioListView(LoginRequiredMixin, ListView):
+    model = Portfolio
+    template_name = 'portfolio/personal_portfolio_list.html'
+    context_object_name = 'user_portfolios'
+    paginate_by = 9
+
+    def get_queryset(self):
+        return Portfolio.objects.filter(user=self.request.user).order_by('-created_at')
+
+
+class PublicPortfolioListView(LoginRequiredMixin, ListView):
+    model = Portfolio
+    template_name = 'portfolio/public_portfolio_list.html'
+    context_object_name = 'public_portfolios'
+    paginate_by = 9
+
+    def get_queryset(self):
+
+        queryset = Portfolio.objects.filter(public=True).annotate(total_upvotes=Count('upvotes')).order_by('-total_upvotes')
+        user_id = self.request.GET.get('user_id')
+
+        if user_id:
+            user = get_object_or_404(user_model, id=user_id)
+            queryset = queryset.filter(user=user)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.request.GET.get('user_id')
+        if user_id:
+            user = get_object_or_404(user_model, id=user_id)
+            context['filtered_user'] = user
+        return context
 
 
 @login_required
-def portfolio(request):
-    # Fetch the authenticated user's portfolios
-    user_portfolios = Portfolio.objects.filter(user=request.user)
+def upvote_portfolio(request, portfolio_id):
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id)
 
-    # Check if the user has portfolios
-    has_portfolios = user_portfolios.exists()
+    if portfolio.public and portfolio.user != request.user:
+        portfolio.upvotes += 1
+        portfolio.save()
+        messages.success(request, 'You upvoted this portfolio!')
 
-    context = {
-        'user_portfolios': user_portfolios,
-        'has_portfolios': has_portfolios,
-    }
+    return HttpResponseRedirect(reverse('personal-portfolios'))
 
-    return render(request, 'equity_optimizer/../../templates/portfolio/portfolio.html', context)
 
+@login_required
+def toggle_upvote(request, portfolio_id):
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id)
+
+    upvote, created = PortfolioUpvote.objects.get_or_create(user=request.user, portfolio=portfolio)
+
+    if not created:
+        upvote.delete()
+        messages.info(request, 'You removed your upvote from this portfolio.')
+    else:
+        messages.success(request, 'You upvoted this portfolio!')
+
+    return HttpResponseRedirect(reverse('personal-portfolios'))
 
 @login_required
 def save_portfolio_view(request):
@@ -49,7 +104,7 @@ def save_portfolio_view(request):
                 return redirect('simulation')
 
             try:
-                save_portfolio_from_simulation(
+                portfolio_creation_service.create_from_simulation(
                     user=user,
                     name=name,
                     description=description,
@@ -58,7 +113,7 @@ def save_portfolio_view(request):
                 )
 
                 messages.success(request, "Portfolio saved successfully.")
-                return redirect('portfolio')
+                return redirect('personal-portfolios')
             except Exception as e:
                 messages.error(request, f"Failed to save portfolio: {str(e)}")
                 print(f"Error during save_portfolio_from_simulation: {e}")
@@ -80,17 +135,22 @@ def save_portfolio_view(request):
         )
 
 
-class PortfolioDetailView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, DetailView):
+class PortfolioDetailView(LoginRequiredMixin, DetailView):
     model = Portfolio
     template_name = 'portfolio/portfolio_detail.html'
     context_object_name = 'portfolio'
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'], user=self.request.user)
+
+        portfolio = get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'])
+
+        if portfolio.user == self.request.user or portfolio.public:
+            return portfolio
+        else:
+            raise PermissionDenied("You do not have permission to view this portfolio.")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         portfolio = context['portfolio']
 
         portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio).select_related('stock')
@@ -118,21 +178,21 @@ class PortfolioDetailView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, Deta
         return context
 
 
-class PortfolioEditView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, UpdateView):
+class PortfolioEditView(ObjectOwnershipRequiredMixin, LoginRequiredMixin, UpdateView):
     model = Portfolio
     form_class = PortfolioForm
     template_name = 'portfolio/portfolio_edit.html'
-    success_url = reverse_lazy('portfolio')
+    success_url = reverse_lazy('personal-portfolios')
 
     def get_object(self, queryset=None):
-        return get_object_or_404(Portfolio, id=self.kwargs.get('portfolio_id'), user=self.request.user)
+        return get_object_or_404(Portfolio, id=self.kwargs.get('portfolio_id'))
 
 
 @user_passes_test(lambda u: u.is_staff)
 def update_portfolios_view(request):
     if request.method == 'POST':
         try:
-            update_all_portfolios_daily_values()
+            portfolio_value_service.update_all_portfolios()
             messages.success(request, 'Portfolio values updated successfully!')
         except Exception as e:
             messages.error(request, f'Failed to update portfolio values. Error: {str(e)}')
