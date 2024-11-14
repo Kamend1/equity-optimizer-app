@@ -1,0 +1,21 @@
+{% extends 'common/base.html' %}
+{% block title %}Update Exchange Rates{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <div class="card shadow-lg rounded-lg">
+            <div class="card-header bg-primary text-white text-center">
+                <h2><i class="fas fa-sync-alt"></i> Update Exchange Rates</h2>
+            </div>
+            <div class="card-body text-center">
+                <p class="lead">Click the button below to update the exchange rates for all currencies.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">
+                        <i class="fas fa-download"></i> Update Exchange Rates
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

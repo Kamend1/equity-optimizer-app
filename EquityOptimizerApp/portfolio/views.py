@@ -6,6 +6,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import UpdateView, DetailView, ListView
 
 from EquityOptimizerApp.equity_optimizer.forms import DateRangeForm
+from EquityOptimizerApp.mixins import ObjectOwnershipRequiredMixin
 from EquityOptimizerApp.portfolio.models import Portfolio, PortfolioStock, PortfolioValueHistory
 from EquityOptimizerApp.portfolio.forms import PortfolioForm
 from EquityOptimizerApp.portfolio.services import save_portfolio_from_simulation, update_all_portfolios_daily_values
@@ -79,7 +80,7 @@ def save_portfolio_view(request):
         )
 
 
-class PortfolioDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+class PortfolioDetailView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, DetailView):
     model = Portfolio
     template_name = 'portfolio/portfolio_detail.html'
     context_object_name = 'portfolio'
@@ -87,16 +88,11 @@ class PortfolioDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'], user=self.request.user)
 
-    def test_func(self):
-        portfolio = self.get_object()
-        return portfolio.user == self.request.user
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         portfolio = context['portfolio']
 
-        # Retrieve related stocks and their details
         portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio).select_related('stock')
         stock_details = [
             {
@@ -122,7 +118,7 @@ class PortfolioDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         return context
 
 
-class PortfolioEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class PortfolioEditView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, UpdateView):
     model = Portfolio
     form_class = PortfolioForm
     template_name = 'portfolio/portfolio_edit.html'
@@ -130,14 +126,6 @@ class PortfolioEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_object(self, queryset=None):
         return get_object_or_404(Portfolio, id=self.kwargs.get('portfolio_id'), user=self.request.user)
-
-    def test_func(self):
-        portfolio = self.get_object()
-        return portfolio.user == self.request.user
-
-    def handle_no_permission(self):
-        messages.error(self.request, "You don't have permission to edit this portfolio.")
-        return redirect('portfolio_list')
 
 
 @user_passes_test(lambda u: u.is_staff)

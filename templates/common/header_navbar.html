@@ -11,11 +11,8 @@
 
         <!-- Admin "Update Stocks" and "Update Portfolios" Links -->
         {% if user.is_staff %}
-            <a href="{% url 'update_stocks' %}" class="nav-link text-light ml-3">
-                <i class="fas fa-sync-alt"></i> Update Stocks
-            </a>
-            <a href="{% url 'update_portfolios' %}" class="nav-link text-light ml-3">
-                <i class="fas fa-sync-alt"></i> Update Portfolios
+            <a href="{% url 'database_update' %}" class="nav-link text-light ml-3">
+                <i class="fas fa-sync-alt"></i> Update Database
             </a>
         {% endif %}
 

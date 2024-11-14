@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth import login
@@ -10,6 +9,7 @@ from django.contrib.auth.views import (PasswordResetView, PasswordResetDoneView,
 
 from EquityOptimizerApp.accounts.forms import CustomUserCreationForm, ProfileEditForm
 from EquityOptimizerApp.accounts.models import Profile
+from EquityOptimizerApp.mixins import ObjectOwnershipRequiredMixin
 
 
 # Create your views here.
@@ -40,7 +40,7 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class ProfileEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+class ProfileEditView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, UpdateView):
     model = Profile
     template_name = 'registration/profile_edit.html'
     form_class = ProfileEditForm
@@ -67,14 +67,6 @@ class ProfileEditView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         profile.save()
 
         return super().form_valid(form)
-
-    def test_func(self):
-        profile = self.get_object()
-        return profile.user == self.request.user
-
-    def handle_no_permission(self):
-        from django.core.exceptions import PermissionDenied
-        raise PermissionDenied("You do not have permission to edit this profile.")
 
 
 class CustomPasswordResetView(PasswordResetView):
@@ -112,21 +104,13 @@ class CustomPasswordChangeDoneView(LoginRequiredMixin, PasswordChangeDoneView):
     template_name = 'registration/custom_password_change_done.html'
 
 
-class ProfileDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+class ProfileDeleteView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, DeleteView):
     model = Profile
     template_name = 'registration/profile_confirm_delete.html'
     success_url = reverse_lazy('register')
 
     def get_object(self, queryset=None):
         return get_object_or_404(Profile, user=self.request.user)
-
-    def test_func(self):
-        profile = self.get_object()
-        return profile.user == self.request.user
-
-    def handle_no_permission(self):
-        messages.error(self.request, "You do not have permission to delete this profile.")
-        raise PermissionDenied("You do not have permission to delete this profile.")
 
     def delete(self, request, *args, **kwargs):
         profile = self.get_object()

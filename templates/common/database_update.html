@@ -1,0 +1,70 @@
+{% extends 'common/base.html' %}
+
+{% block title %}Database Update{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <div class="card shadow-lg rounded-lg">
+            <div class="card-header bg-primary text-white text-center rounded-top">
+                <h2><i class="fas fa-database me-2"></i> Database Update</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    The database update is a three-step process. Please follow the steps in the correct order to ensure data consistency.
+                </p>
+
+                <!-- Steps Table -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">Step</th>
+                                <th scope="col">Description</th>
+                                <th scope="col" class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Step 1: Update Currencies -->
+                            <tr>
+                                <td><strong>1</strong></td>
+                                <td>Update exchange rates for all currencies against the base currency (USD).</td>
+                                <td class="text-center">
+                                    <a href="{% url 'update_exchange_rates' %}" class="btn btn-info btn-sm rounded-pill">
+                                        <i class="fas fa-coins me-1"></i> Update Currencies
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <!-- Step 2: Update Stocks -->
+                            <tr>
+                                <td><strong>2</strong></td>
+                                <td>Update stock data including financial metrics and historical prices.</td>
+                                <td class="text-center">
+                                    <a href="{% url 'update_stocks' %}" class="btn btn-success btn-sm rounded-pill">
+                                        <i class="fas fa-chart-line me-1"></i> Update Stocks
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <!-- Step 3: Update Portfolios -->
+                            <tr>
+                                <td><strong>3</strong></td>
+                                <td>Recalculate and update portfolio values based on the latest stock data.</td>
+                                <td class="text-center">
+                                    <a href="{% url 'update_portfolios' %}" class="btn btn-warning btn-sm rounded-pill">
+                                        <i class="fas fa-briefcase me-1"></i> Update Portfolios
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Warning Message -->
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-exclamation-triangle text-danger"></i> Please follow the steps in the correct order to avoid data inconsistencies.
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

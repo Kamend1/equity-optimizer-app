@@ -27,12 +27,14 @@
 
                 <!-- Action Buttons -->
                 <div class="mt-5 d-flex flex-column align-items-center">
-                    <div class="mb-3 w-100 d-flex justify-content-center">
-                        <a href="{% url 'currency-edit' currency.pk %}"
-                           class="btn btn-warning btn-lg rounded-pill w-50">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                    </div>
+                    {% if user.is_staff %}
+                        <div class="mb-3 w-100 d-flex justify-content-center">
+                            <a href="{% url 'currency-edit' currency.pk %}"
+                               class="btn btn-warning btn-lg rounded-pill w-50">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        </div>
+                    {% endif %}
                     <div class="mb-3 w-100 d-flex justify-content-center">
                         <a href="{% url 'currency-list' %}" class="btn btn-secondary btn-lg rounded-pill w-50">
                             <i class="fas fa-arrow-left"></i> Back to List

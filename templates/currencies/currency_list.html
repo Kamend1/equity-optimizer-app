@@ -34,10 +34,12 @@
                                    class="btn btn-info btn-sm rounded-pill">
                                     <i class="fas fa-eye"></i> View
                                 </a>
-                                <a href="{% url 'currency-edit' currency.pk %}"
-                                   class="btn btn-warning btn-sm rounded-pill">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
+                                {% if user.is_staff %}
+                                    <a href="{% url 'currency-edit' currency.pk %}"
+                                       class="btn btn-warning btn-sm rounded-pill">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                {% endif %}
                                 <a href="{% url 'exchange-rate-list' 'USD' currency.code %}"
                                    class="btn btn-secondary btn-sm rounded-pill">
                                     <i class="fas fa-exchange-alt"></i> View Rates

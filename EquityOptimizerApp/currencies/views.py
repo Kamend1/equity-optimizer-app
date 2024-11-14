@@ -1,8 +1,11 @@
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from .models import Currency, ExchangeRate
 from .forms import CurrencyCreateForm, CurrencyEditForm
+from .services.exchange_rate_service import ExchangeRateService
 from ..equity_optimizer.forms import DateRangeForm
 
 
@@ -81,3 +84,20 @@ class ExchangeRateListView(ListView):
         context['base_currency'] = get_object_or_404(Currency, code=self.kwargs['base_code'])
         context['target_currency'] = get_object_or_404(Currency, code=self.kwargs['target_code'])
         return context
+
+
+@user_passes_test(lambda u: u.is_staff)
+def update_exchange_rates_view(request):
+    if request.method == 'POST':
+        print("POST request received")
+        try:
+            service = ExchangeRateService()
+            for currency in Currency.objects.exclude(code='USD'):
+                service.update_exchange_rates(target_currency_code=currency.code)
+            messages.success(request, 'Exchange rates updated successfully!')
+        except Exception as e:
+            messages.error(request, f'Failed to update exchange rates. Error: {str(e)}')
+
+        return redirect('update_exchange_rates')
+    print("GET request received")
+    return render(request, 'currencies/update_exchange_rates.html')

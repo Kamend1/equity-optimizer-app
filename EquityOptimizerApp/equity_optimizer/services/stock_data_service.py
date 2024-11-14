@@ -42,7 +42,6 @@ class StockDataService:
                 date_value = pd.to_datetime(row['Date']).date()
                 record_key = (stock.id, date_value)
 
-                # Fetch the exchange rate if the currency is not USD
                 if stock.currency_code != 'USD':
                     exchange_rate = (
                         ExchangeRate.objects.filter(
@@ -54,28 +53,38 @@ class StockDataService:
                     if exchange_rate:
                         adj_close_to_usd = row['Adj Close'] / exchange_rate.rate
                     else:
-                        adj_close_to_usd = None  # Fallback if no exchange rate is found
+                        adj_close_to_usd = None
                 else:
                     adj_close_to_usd = row['Adj Close']
 
-                record = StockData(
-                    stock=stock,
-                    date=date_value,
-                    open=row['Open'],
-                    high=row['High'],
-                    low=row['Low'],
-                    close=row['Close'],
-                    adj_close=row['Adj Close'],
-                    volume=row['Volume'],
-                    daily_return=row['daily_return'],
-                    trend=row['trend'],
-                    adj_close_to_usd=adj_close_to_usd,
-                )
-
                 if record_key in existing_records_set:
-                    update_stock_data_objects.append(record)
+                    existing_record = StockData.objects.get(stock=stock, date=date_value)
+                    existing_record.open = row['Open']
+                    existing_record.high = row['High']
+                    existing_record.low = row['Low']
+                    existing_record.close = row['Close']
+                    existing_record.adj_close = row['Adj Close']
+                    existing_record.volume = row['Volume']
+                    existing_record.daily_return = row['daily_return']
+                    existing_record.trend = row['trend']
+                    existing_record.adj_close_to_usd = adj_close_to_usd
+                    update_stock_data_objects.append(existing_record)
                 else:
-                    stock_data_objects.append(record)
+                    # Create a new record
+                    new_record = StockData(
+                        stock=stock,
+                        date=date_value,
+                        open=row['Open'],
+                        high=row['High'],
+                        low=row['Low'],
+                        close=row['Close'],
+                        adj_close=row['Adj Close'],
+                        volume=row['Volume'],
+                        daily_return=row['daily_return'],
+                        trend=row['trend'],
+                        adj_close_to_usd=adj_close_to_usd,
+                    )
+                    stock_data_objects.append(new_record)
 
         print(f"Debug: Preparing to bulk update {len(update_stock_data_objects)} records.")
         print(f"Debug: Preparing to bulk create {len(stock_data_objects)} records.")
