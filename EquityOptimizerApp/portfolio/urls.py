@@ -15,4 +15,5 @@ urlpatterns = [
     ),
     path('save-portfolio/', views.save_portfolio_view, name='save_portfolio'),
     path('update_portfolios/', views.update_portfolios_view, name='update_portfolios'),
+    path('portfolios-performance/', views.portfolio_performance_view, name='portfolios-performance'),
 ]

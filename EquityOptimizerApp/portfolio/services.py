@@ -1,3 +1,6 @@
+import math
+
+import pandas as pd
 from django.db import transaction
 from django.utils import timezone
 from EquityOptimizerApp.portfolio.models import Portfolio, PortfolioValueHistory, PortfolioStock
@@ -64,3 +67,53 @@ class PortfolioValueService:
         portfolios = Portfolio.objects.all()
         for portfolio in portfolios:
             PortfolioValueService.calculate_daily_value(portfolio)
+
+    @staticmethod
+    def calculate_metrics(portfolio, start_date=None, end_date=None):
+        # Default to lifetime performance if no date range is specified
+        if not start_date or not end_date:
+            start_date = portfolio.created_at.date()
+            end_date = timezone.now().date()
+
+        history = PortfolioValueHistory.objects.filter(
+            portfolio=portfolio,
+            date__range=(start_date, end_date)
+        ).order_by('date')
+
+        if history.count() < 2:
+            return None
+
+        initial_value = history.first().value
+        final_value = history.last().value
+        period_return = ((final_value - initial_value) / initial_value) * 100
+
+        daily_returns = [record.daily_return for record in history if record.daily_return is not None]
+
+        if not daily_returns:
+            return None
+
+        std_dev = pd.Series(daily_returns).std()
+        sharpe_ratio = period_return / std_dev if std_dev else 0
+
+        if pd.isna(sharpe_ratio) or pd.isna(period_return):
+            return None
+
+        return {
+            'id': portfolio.id,
+            'name': portfolio.name,
+            'owner': portfolio.user.get_full_name(),
+            'owner_id': portfolio.user.id,
+            'latest_value': final_value,
+            'period_return': round(period_return, 2),
+            'std_dev': round(std_dev, 2),
+            'sharpe_ratio': round(sharpe_ratio, 2),
+        }
+
+    @staticmethod
+    def get_metrics(portfolio, start_date, end_date):
+        metrics = PortfolioValueService.calculate_metrics(portfolio, start_date, end_date)
+
+        if metrics and not (math.isnan(metrics['sharpe_ratio']) or math.isnan(metrics['period_return'])):
+            return metrics
+
+        return None

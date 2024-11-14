@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -228,3 +230,44 @@ class PortfolioValueHistoryListView(LoginRequiredMixin, ListView):
         context['form'] = DateRangeForm(self.request.GET)
         context['portfolio'] = get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'], user=self.request.user)
         return context
+
+
+@login_required
+def portfolio_performance_view(request):
+    form = DateRangeForm(request.POST or None)
+    start_date = None
+    end_date = None
+
+    if request.method == 'POST' and form.is_valid():
+        start_date = form.cleaned_data['start_date']
+        end_date = form.cleaned_data['end_date']
+    else:
+        start_date = None
+        end_date = None
+
+    user_portfolios = Portfolio.objects.filter(user=request.user)
+    public_portfolios = Portfolio.objects.filter(public=True).exclude(user=request.user)
+
+    performance_data = []
+
+    for portfolio in user_portfolios:
+        metrics = portfolio_value_service.get_metrics(portfolio, start_date, end_date)
+        if metrics:
+            performance_data.append(metrics)
+
+    for portfolio in public_portfolios:
+        metrics = portfolio_value_service.get_metrics(portfolio, start_date, end_date)
+        if metrics:
+            performance_data.append(metrics)
+
+    performance_data = sorted(performance_data, key=lambda x: x['sharpe_ratio'], reverse=True)
+
+    context = {
+        'form': form,
+        'performance_data': performance_data,
+        'start_date': start_date,
+        'end_date': end_date,
+        'date_range_specified': start_date and end_date,
+    }
+
+    return render(request, 'portfolio/portfolio_performance_table.html', context)

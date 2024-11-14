@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     "widget_tweaks",
+    'crispy_forms',
+    'crispy_bootstrap5',
 
     'EquityOptimizerApp.equity_optimizer',
     'EquityOptimizerApp.portfolio',
@@ -149,6 +151,9 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_NAME = 'sessionid'

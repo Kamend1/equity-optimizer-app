@@ -13,6 +13,13 @@
             </a>
         </div>
 
+        <!-- Link to Portfolio Ranking -->
+        <div class="text-center mb-4">
+            <a href="{% url 'portfolios-performance' %}" class="btn btn-outline-primary btn-lg rounded-pill">
+                <i class="fas fa-chart-line me-2"></i> Go to Portfolio Ranking
+            </a>
+        </div>
+
         {% if user_portfolios %}
             <div class="row">
                 {% for portfolio in user_portfolios %}
