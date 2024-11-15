@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import OuterRef, Subquery
+
 from .utils import percentage_return_classifier
 
 
@@ -16,10 +18,23 @@ class StockDataManager(models.Manager):
 
 
 class StockManager(models.Manager):
-    def last_adj_close(self):
-        last_stock_data = self.historical_data.order_by('-date').first()
-        return float(last_stock_data.adj_close) if last_stock_data else 0
+    def get_last_adj_close(self):
+
+        from .models import StockData
+
+        latest_record = StockData.objects.filter(stock_id=OuterRef('id')).order_by('-date').values('adj_close')[:1]
+        return Subquery(latest_record)
 
     def get_last_adj_close_to_usd(self):
-        last_adj_close_to_usd = self.historical_data.order_by('-date').first()
-        return float(last_adj_close_to_usd)
+
+        from .models import StockData
+
+        latest_record = StockData.objects.filter(stock_id=OuterRef('id')).order_by('-date').values('adj_close_to_usd')[:1]
+        return Subquery(latest_record)
+
+    def annotate_with_latest_adj_close(self, queryset):
+        queryset = queryset.annotate(
+            latest_adj_close=self.get_last_adj_close(),
+            latest_adj_close_to_usd=self.get_last_adj_close_to_usd()
+        )
+        return queryset

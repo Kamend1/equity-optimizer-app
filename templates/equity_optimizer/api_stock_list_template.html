@@ -1,0 +1,119 @@
+{% extends 'common/base.html' %}
+{% block title %}Stock List (AJAX View){% endblock %}
+
+{% block content %}
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="mb-4 text-center"><i class="fas fa-list-alt"></i> Stock List (AJAX Loaded)</h1>
+
+                <!-- Add Stock Button -->
+                <div class="d-flex justify-content-center mb-4">
+                    <a href="{% url 'add_stock' %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-plus-circle"></i> Add Stock
+                    </a>
+                </div>
+
+                <div class="input-group mb-4">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search stocks...">
+                    <button id="searchButton" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table id="stockTable" class="table table-striped table-bordered table-hover w-100">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Ticker</th>
+                            <th>Name</th>
+                            <th>Sector</th>
+                            <th>Last Close</th>
+                            <th>Market Cap</th>
+                            <th>Dividend Yield</th>
+                            <th>P/B Ratio</th>
+                            <th>P/E Ratio</th>
+                            <th>Beta</th>
+                            <th>52-Week High</th>
+                            <th>52-Week Low</th>
+                            <th>EBITDA</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include jQuery, DataTables, and DataTables Responsive Plugin -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            const apiUrl = "{% url 'api-stock-list' %}";
+
+            // Set up CSRF token for AJAX requests
+            $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": $('input[name="csrfmiddlewaretoken"]').val()
+                }
+            });
+
+            // Initialize DataTable with Responsive Plugin
+            $('#stockTable').DataTable({
+                "ajax": {
+                    "url": apiUrl,
+                    "type": "GET",
+                    "dataType": "json",
+                    "dataSrc": "",
+                    "error": function (xhr, status, error) {
+                        console.error("Error fetching data:", xhr.responseText || error);
+                        alert("Failed to load stock data.");
+                    }
+                },
+                "columns": [
+                    {"data": "ticker", "render": data => `<a href="/stocks/${data}">${data}</a>`},
+                    {"data": "name"},
+                    {"data": "sector"},
+                    {"data": "latest_adj_close", "render": data => data ? `$${parseFloat(data).toFixed(2)}` : "0.00"},
+                    {"data": "market_cap", "render": data => data ? data.toLocaleString() : "0.00"},
+                    {"data": "dividend_yield", "render": data => data ? `${(data * 100).toFixed(2)}%` : "0.00%"},
+                    {"data": "price_to_book", "render": data => data ? data.toFixed(2) : "0.00"},
+                    {"data": "trailing_pe", "render": data => data ? data.toFixed(2) : "0.00"},
+                    {"data": "beta", "render": data => data ? data.toFixed(2) : "0.00"},
+                    {"data": "fifty_two_week_high", "render": data => data ? data.toFixed(2) : "0.00"},
+                    {"data": "fifty_two_week_low", "render": data => data ? data.toFixed(2) : "0.00"},
+                    {"data": "ebitda", "render": data => data ? data.toLocaleString() : "0.00"}
+                ],
+                "paging": true,
+                "ordering": true,
+                "searching": true,
+                "responsive": true,
+                "order": [[3, "desc"]],
+                "language": {
+                    "search": "<i class='fas fa-search me-2'></i>Search:",
+                    "paginate": {
+                        "first": "<i class='fas fa-angle-double-left'></i>",
+                        "previous": "<i class='fas fa-angle-left'></i>",
+                        "next": "<i class='fas fa-angle-right'></i>",
+                        "last": "<i class='fas fa-angle-double-right'></i>"
+                    }
+                }
+            });
+
+            // AJAX Search Integration
+            $('#searchButton').on('click', function () {
+                const query = $('#searchInput').val();
+                $('#stockTable').DataTable().search(query).draw();
+            });
+
+            // Clear search on input change
+            $('#searchInput').on('input', function () {
+                if ($(this).val() === '') {
+                    $('#stockTable').DataTable().search('').draw();
+                }
+            });
+        });
+    </script>
+{% endblock %}

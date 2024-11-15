@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import api_views
 
 urlpatterns = [
     path('simulation/', views.simulation, name='simulation'),
@@ -10,4 +11,6 @@ urlpatterns = [
     path('update_stocks/', views.update_stocks_view, name='update_stocks'),
     path('get-progress/', views.get_progress, name='get_progress'),
     path('<str:ticker>/historical_data/', views.StockDataListView.as_view(), name='stock_data_list'),
+    path('api/stocks/', api_views.StockListAPIView.as_view(), name='api-stock-list'),
+    path('stocks/new_list', views.StockListTemplateView.as_view(), name='stock-list-api'),
 ]

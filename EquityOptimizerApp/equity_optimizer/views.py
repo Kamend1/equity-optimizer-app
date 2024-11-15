@@ -2,7 +2,7 @@ import os
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, TemplateView
 from django.contrib import messages
 from .models import Stock, StockData
 from .forms import DateRangeForm, InitialForm
@@ -170,8 +170,10 @@ class StockListView(ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(delisted=False).order_by('ticker')
+        queryset = Stock.objects.annotate_with_latest_adj_close(queryset)
+
         query = self.request.GET.get('q', '')
-        sort = self.request.GET.get('sort', '')
+        sort = self.request.GET.get('sort', 'ticker')
         direction = self.request.GET.get('direction', 'asc')
 
         if query:
@@ -182,7 +184,11 @@ class StockListView(ListView):
                 sort = f'-{sort}'
             queryset = queryset.order_by(sort)
 
-        return queryset.prefetch_related('historical_data')
+        return queryset
+
+
+class StockListTemplateView(TemplateView):
+    template_name = 'equity_optimizer/api_stock_list_template.html'
 
 
 class StockDetailView(DetailView):

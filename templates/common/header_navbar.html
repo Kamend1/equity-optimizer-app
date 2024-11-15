@@ -9,7 +9,7 @@
             <span class="ml-2">Stock Portfolio App</span>
         </a>
 
-        <!-- Admin "Update Stocks" and "Update Portfolios" Links -->
+        <!-- Admin "Update Database" Link -->
         {% if user.is_staff %}
             <a href="{% url 'database_update' %}" class="nav-link text-light ml-3">
                 <i class="fas fa-sync-alt"></i> Update Database
@@ -39,6 +39,12 @@
                         <i class="fas fa-chart-line"></i> Stocks
                     </a>
                 </li>
+                <!-- New Link to Stocks API -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'stock-list-api' %}">
+                        <i class="fas fa-database"></i> Stocks API
+                    </a>
+                </li>
 
                 <!-- Public "Currencies" Link -->
                 <li class="nav-item">
@@ -60,7 +66,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'personal-portfolios' %}">
-                            <i class="fas fa-briefcase"></i> Portfolio
+                            <i class="fas fa-briefcase"></i> Portfolios
                         </a>
                     </li>
                     <li class="nav-item">
