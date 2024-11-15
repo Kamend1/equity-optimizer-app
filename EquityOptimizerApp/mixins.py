@@ -30,7 +30,7 @@ class ObjectOwnershipRequiredMixin(UserPassesTestMixin):
 
     def test_func(self):
         obj = self.get_object()
-        return obj.user == self.request.user
+        return obj.user == self.request.user or self.request.user.is_superuser
 
     def handle_no_permission(self):
         from django.core.exceptions import PermissionDenied

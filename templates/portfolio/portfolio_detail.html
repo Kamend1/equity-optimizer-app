@@ -38,6 +38,25 @@
                 {% else %}
                     <p class="text-muted">No recorded portfolio value yet.</p>
                 {% endif %}
+
+                <!-- Upvote Section (Only for Non-Owner Users) -->
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-thumbs-up me-2"></i> Total Upvotes: <span
+                            id="upvotes-count">{{ total_upvotes }}</span>
+                    </p>
+                    {% if portfolio.user != request.user %}
+                        <button id="toggle-upvote"
+                                class="btn btn-sm rounded-pill {% if user_has_upvoted %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                            {% if user_has_upvoted %}
+                                <i class="fas fa-thumbs-up text-white me-2"></i> Upvoted
+                            {% else %}
+                                <i class="far fa-thumbs-up me-2"></i> Upvote
+                            {% endif %}
+                        </button>
+                        </div>
+                    {% endif %}
             </div>
         </div>
 
@@ -72,31 +91,65 @@
             </div>
         </div>
 
-        <!-- Action Buttons -->
+        <!-- Action Buttons Section with Improved Spacing -->
         <div class="text-center mt-4">
-            <div class="d-flex flex-column gap-3">
-                <!-- View Value History Button -->
-                <a href="{% url 'portfolio-value-history' portfolio.id %}" class="btn btn-info btn-lg rounded-pill">
+            <!-- View Value History Button -->
+            <div class="mb-3">
+                <a href="{% url 'portfolio-value-history' portfolio.id %}"
+                   class="btn btn-info btn-lg rounded-pill w-100">
                     <i class="fas fa-chart-line"></i> View Value History
                 </a>
+            </div>
 
-                <!-- Edit Portfolio Button -->
-                {% if portfolio.user == request.user %}
-                    <a href="{% url 'portfolio-edit' portfolio.id %}" class="btn btn-primary btn-lg rounded-pill">
+            <!-- Edit Portfolio Button (Only for Owner) -->
+            {% if portfolio.user == request.user %}
+                <div class="mb-3">
+                    <a href="{% url 'portfolio-edit' portfolio.id %}" class="btn btn-primary btn-lg rounded-pill w-100">
                         <i class="fas fa-edit"></i> Edit Portfolio
                     </a>
-                {% endif %}
+                </div>
+            {% endif %}
 
-                <!-- Back to Portfolios Button -->
-                <a href="{% url 'personal-portfolios' %}" class="btn btn-secondary btn-lg rounded-pill">
+            <!-- Back to Portfolios Button -->
+            <div class="mb-3">
+                <a href="{% url 'personal-portfolios' %}" class="btn btn-secondary btn-lg rounded-pill w-100">
                     <i class="fas fa-arrow-left"></i> Back to Portfolios
                 </a>
             </div>
         </div>
+
     </div>
 
-    <!-- Include Bootstrap and FontAwesome from CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- AJAX Upvote Script -->
+    <script>
+        $(document).ready(function () {
+            $('#toggle-upvote').on('click', function (event) {
+                event.preventDefault();
+
+                const btn = $(this);
+                const portfolioId = {{ portfolio.id }};
+                const upvotesCountSpan = $('#upvotes-count');
+
+                $.ajax({
+                    url: `/portfolio/${portfolioId}/toggle-upvote/`,
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val(),
+                    },
+                    success: function (response) {
+                        if (response.status === 'upvoted') {
+                            btn.html('<i class="fas fa-thumbs-up text-white me-2"></i> Upvoted');
+                        } else {
+                            btn.html('<i class="far fa-thumbs-up me-2"></i> Upvote');
+                        }
+                        upvotesCountSpan.text(response.total_upvotes);
+                    },
+                    error: function () {
+                        alert('Failed to toggle upvote. Please try again later.');
+                    }
+                });
+            });
+        });
+    </script>
+
 {% endblock %}

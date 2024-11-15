@@ -1,11 +1,9 @@
-from datetime import datetime
-
 from django.contrib.auth import get_user_model
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
-from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
@@ -41,7 +39,9 @@ class PublicPortfolioListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
 
-        queryset = Portfolio.objects.filter(public=True).annotate(total_upvotes=Count('upvotes')).order_by('-total_upvotes')
+        queryset = Portfolio.objects.filter(public=True).exclude(user=self.request.user).annotate(
+            total_upvotes=Count('upvotes')
+        ).order_by('-total_upvotes')
         user_id = self.request.GET.get('user_id')
 
         if user_id:
@@ -56,34 +56,34 @@ class PublicPortfolioListView(LoginRequiredMixin, ListView):
         if user_id:
             user = get_object_or_404(user_model, id=user_id)
             context['filtered_user'] = user
+
+        upvoted_portfolio_ids = set(PortfolioUpvote.objects.filter(user=self.request.user).values_list('portfolio_id', flat=True))
+        context['upvoted_portfolio_ids'] = upvoted_portfolio_ids
         return context
 
 
 @login_required
-def upvote_portfolio(request, portfolio_id):
-    portfolio = get_object_or_404(Portfolio, id=portfolio_id)
-
-    if portfolio.public and portfolio.user != request.user:
-        portfolio.upvotes += 1
-        portfolio.save()
-        messages.success(request, 'You upvoted this portfolio!')
-
-    return HttpResponseRedirect(reverse('personal-portfolios'))
-
-
-@login_required
 def toggle_upvote(request, portfolio_id):
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        return JsonResponse({'error': 'Invalid request type.'}, status=400)
+
     portfolio = get_object_or_404(Portfolio, id=portfolio_id)
+
+    if portfolio.user == request.user:
+        return JsonResponse({'error': 'You cannot upvote your own portfolio.'}, status=400)
 
     upvote, created = PortfolioUpvote.objects.get_or_create(user=request.user, portfolio=portfolio)
 
     if not created:
         upvote.delete()
-        messages.info(request, 'You removed your upvote from this portfolio.')
+        status = 'removed'
     else:
-        messages.success(request, 'You upvoted this portfolio!')
+        status = 'upvoted'
 
-    return HttpResponseRedirect(reverse('personal-portfolios'))
+    total_upvotes = PortfolioUpvote.objects.filter(portfolio=portfolio).count()
+
+    return JsonResponse({'status': status, 'total_upvotes': total_upvotes})
+
 
 @login_required
 def save_portfolio_view(request):
@@ -143,7 +143,6 @@ class PortfolioDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'portfolio'
 
     def get_object(self, queryset=None):
-
         portfolio = get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'])
 
         if portfolio.user == self.request.user or portfolio.public:
@@ -170,11 +169,17 @@ class PortfolioDetailView(LoginRequiredMixin, DetailView):
         latest_value_date = latest_value_entry.date if latest_value_entry else None
         latest_value = latest_value_entry.value if latest_value_entry else None
 
+        user_has_upvoted = PortfolioUpvote.objects.filter(user=self.request.user, portfolio=portfolio).exists()
+
+        total_upvotes = PortfolioUpvote.objects.filter(portfolio=portfolio).count()
+
         context.update({
             'stock_details': stock_details,
             'latest_value_date': latest_value_date,
             'latest_value': latest_value,
             'user_profile_link': reverse('profile_details', kwargs={'pk': portfolio.user.pk}),
+            'user_has_upvoted': user_has_upvoted,
+            'total_upvotes': total_upvotes,
         })
 
         return context
@@ -211,7 +216,15 @@ class PortfolioValueHistoryListView(LoginRequiredMixin, ListView):
     paginate_by = 50
 
     def get_queryset(self):
-        portfolio = get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'], user=self.request.user)
+
+        portfolio = get_object_or_404(
+            Portfolio,
+            id=self.kwargs['portfolio_id'],
+        )
+
+        if not portfolio.public and portfolio.user != self.request.user:
+            raise PermissionDenied("You do not have permission to view this portfolio.")
+
         queryset = PortfolioValueHistory.objects.filter(portfolio=portfolio).order_by('-date')
 
         form = DateRangeForm(self.request.GET)
@@ -227,8 +240,13 @@ class PortfolioValueHistoryListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        portfolio = get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'])
+
+        if not portfolio.public and portfolio.user != self.request.user:
+            raise PermissionDenied("You do not have permission to view this portfolio.")
+
         context['form'] = DateRangeForm(self.request.GET)
-        context['portfolio'] = get_object_or_404(Portfolio, id=self.kwargs['portfolio_id'], user=self.request.user)
+        context['portfolio'] = portfolio
         return context
 
 

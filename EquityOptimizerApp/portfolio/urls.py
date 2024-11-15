@@ -10,7 +10,6 @@ urlpatterns = [
         path('edit/', views.PortfolioEditView.as_view(), name='portfolio-edit'),
         path('value-history/', views.PortfolioValueHistoryListView.as_view(), name='portfolio-value-history'),
         path('toggle-upvote/', views.toggle_upvote, name='portfolio-toggle-upvote'),
-        path('upvote/', views.upvote_portfolio, name='upvote')
         ])
     ),
     path('save-portfolio/', views.save_portfolio_view, name='save_portfolio'),
