@@ -1,6 +1,7 @@
 from datetime import datetime
 import random
 import numpy as np
+from django.db.models import Min, Max
 
 
 def percentage_return_classifier(percentage_return):

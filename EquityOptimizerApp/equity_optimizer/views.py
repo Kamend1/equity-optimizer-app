@@ -24,6 +24,8 @@ def simulation(request):
         initial_form = InitialForm(request.POST, user=request.user)
 
         if initial_form.is_valid():
+            print("Form is valid. Proceeding with simulation...")
+
             start_date = initial_form.cleaned_data['start_date']
             end_date = initial_form.cleaned_data['end_date']
             risk_free_rate = float(initial_form.cleaned_data['risk_free_rate'])
@@ -40,9 +42,11 @@ def simulation(request):
 
             try:
                 close_price_df = stock_data_service.fetch_stock_data(stock_symbols, start_date, end_date)
+                print("Data fetched successfully. Shape:", close_price_df.shape)
             except Exception as e:
-                messages.error(request, f"Failed to fetch stock data: {str(e)}")
-                return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
+                print(f"Error fetching stock data: {str(e)}")
+                context = {'error_message': str(e)}
+                return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form, 'error_message': str(e)})
 
             try:
                 sim_out_df, best_portfolio_data = SimulationService.run_simulation(
@@ -53,7 +57,9 @@ def simulation(request):
                     risk_free_rate,
                     close_price_df
                 )
+                print("Simulation completed successfully.")
             except Exception as e:
+                print(f"Simulation failed: {str(e)}")
                 messages.error(request, f"Simulation failed: {str(e)}")
                 return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
 
@@ -62,28 +68,40 @@ def simulation(request):
                     sim_out_df,
                     best_portfolio_data
                 )
+                print("Figures generated successfully.")
             except Exception as e:
+                print(f"Failed to generate figures: {str(e)}")
                 messages.error(request, f"Failed to generate figures: {str(e)}")
                 return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
 
-            best_portfolio_data['Weights'] = [
-                (float(round(weight * 100, 2)), ticker) for weight, ticker in zip(
-                    best_portfolio_data['Weights'], stock_symbols
-                )
-            ]
-            request.session['best_portfolio_data'] = best_portfolio_data
-            request.session['initial_investment'] = float(initial_investment)
+            try:
+                best_portfolio_data['Weights'] = [
+                    (float(round(weight * 100, 2)), ticker) for weight, ticker in zip(
+                        best_portfolio_data['Weights'], stock_symbols
+                    )
+                ]
+                request.session['best_portfolio_data'] = best_portfolio_data
+                request.session['initial_investment'] = float(initial_investment)
 
-            context = {
-                'fig1_html': fig1_html,
-                'fig2_html': fig2_html,
-                'fig3_html': fig3_html,
-                'fig4_html': fig4_html,
-                'best_portfolio_data': best_portfolio_data,
-            }
-            return render(request, 'equity_optimizer/simulation_results.html', context)
+                context = {
+                    'fig1_html': fig1_html,
+                    'fig2_html': fig2_html,
+                    'fig3_html': fig3_html,
+                    'fig4_html': fig4_html,
+                    'best_portfolio_data': best_portfolio_data,
+                }
+
+                print("Rendering simulation results page...")
+                return render(request, 'equity_optimizer/simulation_results.html', context)
+
+            except Exception as e:
+                print(f"Error during final rendering: {str(e)}")
+                messages.error(request, f"Error during final rendering: {str(e)}")
+                return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
 
         else:
+            print("Form validation failed. Errors:", initial_form.errors)
+            messages.error(request, "Form validation failed. Please check your input.")
             return render(request, 'equity_optimizer/simulation.html', {'initial_form': initial_form})
 
     else:

@@ -3,7 +3,7 @@ from django.db import transaction
 from django.db.models import Count
 
 from EquityOptimizerApp.currencies.models import ExchangeRate
-from EquityOptimizerApp.equity_optimizer.models import StockData
+from EquityOptimizerApp.equity_optimizer.models import StockData, Stock
 from EquityOptimizerApp.equity_optimizer.services import DataFetcher, StockService
 from EquityOptimizerApp.equity_optimizer.utils import percentage_return_classifier
 
@@ -111,7 +111,9 @@ class StockDataService:
     @staticmethod
     def fetch_stock_data(stock_symbols, start_date='2010-01-01', end_date=None):
         """
-        Fetch historical stock data for given stock symbols from the database and return as a DataFrame.
+        Fetch historical stock data for given stock symbols and return a cleaned DataFrame.
+        Handles IPO dates, delisted stocks, and aligns data across different markets.
+        Logs issues with IPO and delisting dates in a results list.
         """
         try:
             if not stock_symbols:
@@ -123,6 +125,9 @@ class StockDataService:
             if end_date is None:
                 end_date = pd.Timestamp.now().strftime('%Y-%m-%d')
 
+            results = []
+
+            # Fetch historical stock data within the date range
             stock_data = StockData.objects.filter(
                 stock__ticker__in=stock_symbols,
                 date__gte=start_date,
@@ -132,24 +137,71 @@ class StockDataService:
             if not stock_data.exists():
                 raise ValueError("No historical data found for the provided stock symbols and date range.")
 
-            data_list = list(stock_data.values('stock__ticker', 'date', 'adj_close'))
-            for data in data_list:
-                data['adj_close'] = float(data['adj_close'])
-
+            # Convert data to DataFrame
+            data_list = list(stock_data.values('stock__ticker', 'date', 'adj_close_to_usd'))
             df = pd.DataFrame(data_list)
 
             if df.empty:
                 raise ValueError("Converted DataFrame is empty.")
 
-            close_price_df = df.pivot(index='date', columns='stock__ticker', values='adj_close')
+            # Pivot the DataFrame
+            close_price_df = df.pivot(index='date', columns='stock__ticker', values='adj_close_to_usd')
 
-            with pd.option_context('future.no_silent_downcasting', True):
-                close_price_df.infer_objects(copy=False).fillna(0)
+            # Ensure the index is in datetime format
+            close_price_df.index = pd.to_datetime(close_price_df.index)
 
+            # Reindex to include all business days within the specified date range
+            all_dates = pd.date_range(start=start_date, end=end_date, freq='B')
+            close_price_df = close_price_df.reindex(all_dates)
+
+            # Safely determine the common start and end dates across stocks
+            # Get the first valid date across all columns
+            first_valid_index = pd.to_datetime(close_price_df.apply(lambda col: col.first_valid_index()).min())
+
+            # Get the last valid date across all columns
+            last_valid_index = pd.to_datetime(close_price_df.apply(lambda col: col.last_valid_index()).max())
+
+            # Determine the common start and end dates
+            common_start_date = max(pd.to_datetime(start_date),
+                                    first_valid_index) if first_valid_index else pd.to_datetime(start_date)
+            common_end_date = min(pd.to_datetime(end_date), last_valid_index) if last_valid_index else pd.to_datetime(
+                end_date)
+
+            # Check each stock for missing data at the common start and end dates
+            for ticker in stock_symbols:
+                first_date = close_price_df[ticker].first_valid_index()
+                last_date = close_price_df[ticker].last_valid_index()
+
+                # Log missing data at the start date
+                if first_date and first_date > common_start_date:
+                    results.append(
+                        f"Stock {ticker} is missing data at the common start date ({common_start_date}). First available date: {first_date}."
+                    )
+
+                # Log missing data at the end date
+                if last_date and last_date < common_end_date:
+                    results.append(
+                        f"Stock {ticker} is missing data at the common end date ({common_end_date}). Last available date: {last_date}."
+                    )
+
+            # Log and handle issues
+            if results:
+                raise ValueError(f"Please check out the following stocks: {'\n'.join(results)}")
+
+            print("step 1\n", close_price_df)
+            # Forward fill and replace remaining NaNs with 0.00
+            close_price_df.fillna(method='ffill', inplace=True)
+
+            print("step 2\n", close_price_df)
+            # Reset index and ensure correct data types
             close_price_df.reset_index(inplace=True)
+            close_price_df.rename(columns={'index': 'date'}, inplace=True)
 
-            numeric_cols = close_price_df.columns.difference(['date'])
-            close_price_df[numeric_cols] = close_price_df[numeric_cols].astype(float)
+            print(close_price_df.info())
+            print(close_price_df.dtypes)
+
+
+            print("step 3\n", close_price_df)
 
             return close_price_df
 
@@ -163,7 +215,7 @@ class StockDataService:
         stock_data = StockData.objects.filter(
             stock__ticker=ticker,
             date__range=[start_date, end_date]
-        ).values('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume', 'daily_return')
+        ).values('date', 'open', 'high', 'low', 'close', 'adj_close', 'volume', 'daily_return', 'adj_close_to_usd',)
 
         df = pd.DataFrame(list(stock_data))
         if not df.empty:

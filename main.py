@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import yfinance as yf
 import pandas as pd
 #
@@ -49,5 +51,18 @@ import pandas as pd
 # info = stock_data.info
 #
 # print(info['currency'])
+
+# import yfinance as yf
+# from datetime import datetime
+#
+# # Example: Fetch data for Apple (AAPL)
+# ticker = yf.Ticker("AAPL")
+# stock_info = ticker.info
+# ipo_date = datetime.utcfromtimestamp(stock_info.get("firstTradeDateEpochUtc")).strftime('%Y-%m-%d') if stock_info.get("firstTradeDateEpochUtc") else None
+# print(f"IPO Date: {ipo_date}")
+#
+#
+# # Print all available keys in the info dictionary
+# pprint(stock_info.keys())
 
 

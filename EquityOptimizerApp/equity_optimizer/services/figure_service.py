@@ -12,12 +12,15 @@ class FigureService:
 
     @staticmethod
     def generate_simulation_figures(sim_out_df, best_portfolio_data):
+
+        sim_out_df['Sharpe_Ratio_Size'] = sim_out_df['Sharpe_Ratio'].apply(lambda x: max(abs(x), 0.1))
+
         fig1 = px.scatter(
             sim_out_df,
             x='Volatility',
             y='Portfolio_Return',
             color='Sharpe_Ratio',
-            size='Sharpe_Ratio',
+            size='Sharpe_Ratio_Size',
             hover_data=['Sharpe_Ratio']
         )
         fig1.add_trace(go.Scatter(
