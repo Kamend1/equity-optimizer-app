@@ -3,7 +3,8 @@ from django.db import transaction
 from django.db.models import Count
 
 from EquityOptimizerApp.currencies.models import ExchangeRate
-from EquityOptimizerApp.equity_optimizer.models import StockData, Stock
+from EquityOptimizerApp.currencies.services.exchange_rate_service import ExchangeRateService
+from EquityOptimizerApp.equity_optimizer.models import StockData
 from EquityOptimizerApp.equity_optimizer.services import DataFetcher, StockService
 from EquityOptimizerApp.equity_optimizer.utils import percentage_return_classifier
 
@@ -11,6 +12,113 @@ from EquityOptimizerApp.equity_optimizer.utils import percentage_return_classifi
 class StockDataService:
     def __init__(self, fetcher: DataFetcher):
         self.fetcher = fetcher
+
+    @staticmethod
+    def create_new_record(stock, row, date_value, adj_close_to_usd):
+        return StockData(
+            stock=stock,
+            date=date_value,
+            open=row['Open'],
+            high=row['High'],
+            low=row['Low'],
+            close=row['Close'],
+            adj_close=row['Adj Close'],
+            volume=row['Volume'],
+            daily_return=row['daily_return'],
+            trend=row['trend'],
+            adj_close_to_usd=adj_close_to_usd,
+        )
+
+    @staticmethod
+    def update_existing_record(record, row, adj_close_to_usd):
+        record.open = row['Open']
+        record.high = row['High']
+        record.low = row['Low']
+        record.close = row['Close']
+        record.adj_close = row['Adj Close']
+        record.volume = row['Volume']
+        record.daily_return = row['daily_return']
+        record.trend = row['trend']
+        record.adj_close_to_usd = adj_close_to_usd
+        return record
+
+    @staticmethod
+    def fetch_existing_records(stock_list):
+        existing_records_set = set()
+        for stock in stock_list:
+            existing_dates = StockData.objects.filter(stock=stock).values_list('stock_id', 'date')
+            existing_records_set.update(existing_dates)
+
+        print(f"Debug: Found {len(existing_records_set)} existing records in the database.")
+
+        return existing_records_set
+
+    def download_historical_data(self, stock, start_date):
+        try:
+            data = self.fetcher.download_historical_data(stock.ticker, start_date)
+            if data.empty:
+                print(f"Warning: No data returned for {stock.ticker}. Skipping.")
+                return None
+            return data
+        except Exception as e:
+            print(f"Error: Ticker '{stock.ticker}' may be delisted or invalid. Skipping.")
+            return None
+
+    def process_stock_data(self, data, stock, existing_records_set):
+        stock_data_objects = []
+        update_stock_data_objects = []
+
+        data['daily_return'] = data['Adj Close'].pct_change() * 100
+        data['trend'] = data['daily_return'].apply(percentage_return_classifier)
+        data.reset_index(inplace=True)
+
+        for _, row in data.iterrows():
+            date_value = pd.to_datetime(row['Date']).date()
+            record_key = (stock.id, date_value)
+
+            adj_close_to_usd = (
+                row['Adj Close'] / ExchangeRateService.get_exchange_rate(stock.currency_code, date_value)
+                if stock.currency_code != 'USD'
+                else row['Adj Close']
+            )
+
+            if record_key in existing_records_set:
+                existing_record = StockData.objects.get(stock=stock, date=date_value)
+                update_stock_data_objects.append(self.update_existing_record(existing_record, row, adj_close_to_usd))
+            else:
+                stock_data_objects.append(self.create_new_record(stock, row, date_value, adj_close_to_usd))
+
+        return stock_data_objects, update_stock_data_objects
+
+    @staticmethod
+    def save_stock_data(stock_data_objects, update_stock_data_objects):
+        with transaction.atomic():
+            if update_stock_data_objects:
+                fields_to_update = [
+                    'date', 'open', 'high', 'low', 'close', 'adj_close',
+                    'volume', 'daily_return', 'trend', 'adj_close_to_usd'
+                ]
+                StockData.objects.bulk_update(update_stock_data_objects, fields=fields_to_update, batch_size=1000)
+                print(f"Updated {len(update_stock_data_objects)} records.")
+
+            if stock_data_objects:
+                StockData.objects.bulk_create(stock_data_objects, batch_size=1000)
+                print(f"Created {len(stock_data_objects)} records.")
+
+    # def download_and_save_stock_data(self, stock_list, start_date='2010-01-01'):
+    #     stock_data_objects = []
+    #     update_stock_data_objects = []
+    #     existing_records_set = self.fetch_existing_records(stock_list)
+    #
+    #     for stock in stock_list:
+    #         data = self.download_historical_data(stock, start_date)
+    #         if data is None:
+    #             continue
+    #
+    #         stock_data_objects, update_stock_data_objects = self.process_stock_data(data, stock, existing_records_set)
+    #
+    #     self.save_stock_data(stock_data_objects, update_stock_data_objects)
+    #     return stock_data_objects, update_stock_data_objects
 
     def download_and_save_stock_data(self, stock_list, start_date='2010-01-01', interval='1d'):
         stock_data_objects = []
@@ -109,105 +217,113 @@ class StockDataService:
         return stock_data_objects + update_stock_data_objects
 
     @staticmethod
+    def fetch_data_from_db(stock_symbols, start_date, end_date):
+        return StockData.objects.filter(
+            stock__ticker__in=stock_symbols,
+            date__gte=start_date,
+            date__lte=end_date
+        ).select_related('stock')
+
+    @staticmethod
+    def convert_to_dataframe(stock_data):
+        data_list = list(stock_data.values('stock__ticker', 'date', 'adj_close_to_usd'))
+        df = pd.DataFrame(data_list)
+
+        if df.empty:
+            raise ValueError("Converted DataFrame is empty.")
+
+        close_price_df = df.pivot(index='date', columns='stock__ticker', values='adj_close_to_usd')
+        close_price_df.index = pd.to_datetime(close_price_df.index)
+        return close_price_df
+
+    @staticmethod
+    def validate_common_dates(close_price_df, stock_symbols, start_date, end_date):
+        results = []
+        first_valid_index = pd.to_datetime(close_price_df.apply(lambda col: col.first_valid_index()).min())
+        last_valid_index = pd.to_datetime(close_price_df.apply(lambda col: col.last_valid_index()).max())
+
+        common_start_date = max(start_date, first_valid_index) if first_valid_index else start_date
+        common_end_date = min(end_date, last_valid_index) if last_valid_index else end_date
+
+        for ticker in stock_symbols:
+            first_date = close_price_df[ticker].first_valid_index()
+            last_date = close_price_df[ticker].last_valid_index()
+
+            if first_date and first_date > common_start_date:
+                results.append(
+                    f"Stock {ticker} is missing data at the common start date ({common_start_date}). "
+                    f"First available date: {first_date}."
+                )
+
+            if last_date and last_date < common_end_date:
+                results.append(
+                    f"Stock {ticker} is missing data at the common end date ({common_end_date}). "
+                    f"Last available date: {last_date}."
+                )
+
+        if results:
+            raise ValueError(f"Please check out the following stocks: {'\n'.join(results)}")
+
+    @staticmethod
+    def clean_and_align_data(close_price_df, start_date, end_date):
+        all_dates = pd.date_range(start=start_date, end=end_date, freq='B')
+        close_price_df = close_price_df.reindex(all_dates)
+        close_price_df.fillna(method='ffill', inplace=True)
+        close_price_df.fillna(0.00, inplace=True)
+        close_price_df.reset_index(inplace=True)
+        close_price_df.rename(columns={'index': 'date'}, inplace=True)
+        return close_price_df
+
+    @staticmethod
     def fetch_stock_data(stock_symbols, start_date='2010-01-01', end_date=None):
-        """
-        Fetch historical stock data for given stock symbols and return a cleaned DataFrame.
-        Handles IPO dates, delisted stocks, and aligns data across different markets.
-        Logs issues with IPO and delisting dates in a results list.
-        """
         try:
             if not stock_symbols:
                 raise ValueError("No stock symbols provided.")
 
-            if start_date is None:
-                start_date = '2010-01-01'
+            start_date = pd.to_datetime(start_date)
+            end_date = pd.to_datetime(end_date) if end_date else pd.Timestamp.now()
 
-            if end_date is None:
-                end_date = pd.Timestamp.now().strftime('%Y-%m-%d')
+            # Step 1: Fetch data from the database
+            try:
+                print("Fetching stock data from the database...")
+                stock_data = StockDataService.fetch_data_from_db(stock_symbols, start_date, end_date)
+                print(f"Step 1 - Stock data fetched: {len(stock_data)} records")
+            except Exception as e:
+                print(f"Error in Step 1 - Fetching stock data: {str(e)}")
+                raise ValueError(f"Failed to fetch stock data from the database: {str(e)}")
 
-            results = []
+            # Step 2: Convert the data to a DataFrame
+            try:
+                print("Converting stock data to DataFrame...")
+                close_price_df = StockDataService.convert_to_dataframe(stock_data)
+                print(f"Step 2 - DataFrame created with shape: {close_price_df.shape}")
+            except Exception as e:
+                print(f"Error in Step 2 - Converting to DataFrame: {str(e)}")
+                raise ValueError(f"Failed to convert stock data to DataFrame: {str(e)}")
 
-            # Fetch historical stock data within the date range
-            stock_data = StockData.objects.filter(
-                stock__ticker__in=stock_symbols,
-                date__gte=start_date,
-                date__lte=end_date
-            ).select_related('stock')
+            # Step 3: Validate common start and end dates
+            try:
+                print("Validating common start and end dates across stocks...")
+                StockDataService.validate_common_dates(close_price_df, stock_symbols, start_date, end_date)
+                print("Step 3 - Date validation completed successfully")
+            except Exception as e:
+                print(f"Error in Step 3 - Validating dates: {str(e)}")
+                raise ValueError(f"Date validation failed: {str(e)}")
 
-            if not stock_data.exists():
-                raise ValueError("No historical data found for the provided stock symbols and date range.")
-
-            # Convert data to DataFrame
-            data_list = list(stock_data.values('stock__ticker', 'date', 'adj_close_to_usd'))
-            df = pd.DataFrame(data_list)
-
-            if df.empty:
-                raise ValueError("Converted DataFrame is empty.")
-
-            # Pivot the DataFrame
-            close_price_df = df.pivot(index='date', columns='stock__ticker', values='adj_close_to_usd')
-
-            # Ensure the index is in datetime format
-            close_price_df.index = pd.to_datetime(close_price_df.index)
-
-            # Reindex to include all business days within the specified date range
-            all_dates = pd.date_range(start=start_date, end=end_date, freq='B')
-            close_price_df = close_price_df.reindex(all_dates)
-
-            # Safely determine the common start and end dates across stocks
-            # Get the first valid date across all columns
-            first_valid_index = pd.to_datetime(close_price_df.apply(lambda col: col.first_valid_index()).min())
-
-            # Get the last valid date across all columns
-            last_valid_index = pd.to_datetime(close_price_df.apply(lambda col: col.last_valid_index()).max())
-
-            # Determine the common start and end dates
-            common_start_date = max(pd.to_datetime(start_date),
-                                    first_valid_index) if first_valid_index else pd.to_datetime(start_date)
-            common_end_date = min(pd.to_datetime(end_date), last_valid_index) if last_valid_index else pd.to_datetime(
-                end_date)
-
-            # Check each stock for missing data at the common start and end dates
-            for ticker in stock_symbols:
-                first_date = close_price_df[ticker].first_valid_index()
-                last_date = close_price_df[ticker].last_valid_index()
-
-                # Log missing data at the start date
-                if first_date and first_date > common_start_date:
-                    results.append(
-                        f"Stock {ticker} is missing data at the common start date ({common_start_date}). First available date: {first_date}."
-                    )
-
-                # Log missing data at the end date
-                if last_date and last_date < common_end_date:
-                    results.append(
-                        f"Stock {ticker} is missing data at the common end date ({common_end_date}). Last available date: {last_date}."
-                    )
-
-            # Log and handle issues
-            if results:
-                raise ValueError(f"Please check out the following stocks: {'\n'.join(results)}")
-
-            print("step 1\n", close_price_df)
-            # Forward fill and replace remaining NaNs with 0.00
-            close_price_df.fillna(method='ffill', inplace=True)
-
-            print("step 2\n", close_price_df)
-            # Reset index and ensure correct data types
-            close_price_df.reset_index(inplace=True)
-            close_price_df.rename(columns={'index': 'date'}, inplace=True)
-
-            print(close_price_df.info())
-            print(close_price_df.dtypes)
-
-
-            print("step 3\n", close_price_df)
+            # Step 4: Clean and align data
+            try:
+                print("Cleaning and aligning stock data...")
+                close_price_df = StockDataService.clean_and_align_data(close_price_df, start_date, end_date)
+                print(f"Step 4 - Data cleaned and aligned. Final DataFrame shape: {close_price_df.shape}")
+            except Exception as e:
+                print(f"Error in Step 4 - Cleaning and aligning data: {str(e)}")
+                raise ValueError(f"Failed to clean and align data: {str(e)}")
 
             return close_price_df
 
         except Exception as e:
             print(f"Error fetching stock data: {str(e)}")
-            raise
+            raise ValueError(f"Error fetching stock data: {str(e)}")
 
     @staticmethod
     def get_stock_data_by_ticker(ticker, start_date, end_date):

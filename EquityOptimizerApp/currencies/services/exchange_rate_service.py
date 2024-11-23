@@ -10,6 +10,41 @@ class ExchangeRateService:
     def __init__(self, fetcher=None):
         self.fetcher = fetcher or YFinanceExchangeRateFetcher()
 
+    @staticmethod
+    def get_exchange_rate(target_currency_code, date):
+        """
+        Fetch the exchange rate for the target currency to USD on a specific date.
+        """
+        try:
+
+            exchange_rate = ExchangeRate.objects.filter(
+                base_currency__code='USD',
+                target_currency__code=target_currency_code,
+                date=date
+            ).first()
+
+            if exchange_rate:
+                return float(exchange_rate.rate)
+
+            exchange_rate = ExchangeRate.objects.filter(
+                base_currency__code='USD',
+                target_currency__code=target_currency_code,
+                date__lte=date
+            ).order_by('-date').first()
+
+            if exchange_rate:
+                print(f"Using latest available exchange rate for {target_currency_code} on {exchange_rate.date}.")
+                return float(exchange_rate.rate)
+
+            if target_currency_code == 'USD':
+                return 1.0
+
+            raise ValueError(f"Exchange rate for {target_currency_code} on {date} is missing.")
+
+        except Exception as e:
+            print(f"Error fetching exchange rate for {target_currency_code} on {date}: {str(e)}")
+            raise
+
     def update_exchange_rates(self, base_currency_code='USD', target_currency_code=None, start_date='2010-01-01'):
         print(f"Debug: Entered update_exchange_rates with target_currency_code={target_currency_code}")
 
