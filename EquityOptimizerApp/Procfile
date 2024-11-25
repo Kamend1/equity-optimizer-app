@@ -1,1 +1,1 @@
-web: gunicorn EquityOptimizerApp.wsgi
+web: gunicorn equityoptimizerapp.wsgi
