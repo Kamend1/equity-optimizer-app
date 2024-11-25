@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-git import dj_database_url
+import dj_database_url
 from pathlib import Path
 from decouple import config
 from django.urls import reverse_lazy
