@@ -15,7 +15,6 @@ from decouple import config
 from django.urls import reverse_lazy
 import django_heroku
 
-django_heroku.settings(locals())
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -204,3 +203,5 @@ SESSION_COOKIE_SECURE = True
 LOGOUT_REDIRECT_URL = reverse_lazy('login')
 LOGIN_REDIRECT_URL = reverse_lazy('home')
 LOGIN_URL = reverse_lazy('login')
+
+django_heroku.settings(locals())
