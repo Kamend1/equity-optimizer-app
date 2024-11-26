@@ -3,45 +3,74 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded">
-                <div class="card-header bg-primary text-white text-center">
-                    <h3 class="mb-0">Login</h3>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <!-- Username Field -->
-                        <div class="form-group">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
-                            <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" class="form-control" value="{{ form.username.value|default_if_none:'' }}" aria-describedby="{{ form.username.id_for_label }}-help">
-                            {{ form.username.errors }}
-                        </div>
-                        
-                        <!-- Password Field -->
-                        <div class="form-group">
-                            <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
-                            <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" class="form-control" value="{{ form.password.value|default_if_none:'' }}" aria-describedby="{{ form.password.id_for_label }}-help">
-                            {{ form.password.errors }}
-                        </div>
-                        
-                        <!-- Submit Button -->
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary btn-block">Login</button>
-                        </div>
-                    </form>
-                    <div class="text-center mt-3">
-                        <a href="{% url 'password_reset' %}" class="btn btn-link">Forgot Password?</a>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0 rounded">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3 class="mb-0">Login</h3>
                     </div>
-                </div>
-                <div class="card-footer text-center">
-                    <p class="mb-0">Don't have an account? <a href="{% url 'register' %}" class="btn btn-link">Sign Up</a></p>
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <!-- Display Non-Field Errors -->
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for error in form.non_field_errors %}
+                                        <p class="mb-0">{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <!-- Username Field -->
+                            <div class="form-group">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                                <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}"
+                                       class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                                       value="{{ form.username.value|default_if_none:'' }}"
+                                       aria-describedby="{{ form.username.id_for_label }}-help">
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.username.errors %}
+                                            <p class="mb-0">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="form-group">
+                                <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                                <input type="password" name="{{ form.password.name }}"
+                                       id="{{ form.password.id_for_label }}"
+                                       class="form-control {% if form.password.errors %}is-invalid{% endif %}"
+                                       value="{{ form.password.value|default_if_none:'' }}"
+                                       aria-describedby="{{ form.password.id_for_label }}-help">
+                                {% if form.password.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.password.errors %}
+                                            <p class="mb-0">{{ error }}</p>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                            </div>
+                        </form>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'password_reset' %}" class="btn btn-link">Forgot Password?</a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p class="mb-0">Don't have an account? <a href="{% url 'register' %}" class="btn btn-link">Sign
+                            Up</a></p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

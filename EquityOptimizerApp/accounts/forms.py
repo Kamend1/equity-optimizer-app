@@ -41,15 +41,60 @@ class CustomUserCreationForm(UserCreationForm):
             raise forms.ValidationError("You must agree to the terms and conditions.")
         return terms
 
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if not re.match(r'^[a-zA-Z0-9_]+$', username):
+            raise forms.ValidationError("Username can only contain letters, numbers, and underscores.")
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("A user with this username already exists.")
+        return username
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords do not match.")
+        if len(password1) < 8:
+            raise forms.ValidationError("Password must be at least 8 characters long.")
+        if not any(char.isdigit() for char in password1):
+            raise forms.ValidationError("Password must contain at least one number.")
+        if not any(char.isalpha() for char in password1):
+            raise forms.ValidationError("Password must contain at least one letter.")
+        return password2
+
 
 class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
+        error_messages={
+            'required': _("Username is required."),
+            'max_length': _("Username cannot exceed 150 characters."),
+        },
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
+        error_messages={
+            'required': _("Password is required."),
+        },
+    )
+
     class Meta:
         model = User
         fields = ['username', 'password']
-        widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
-            'password': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
-        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get('username')
+        password = cleaned_data.get('password')
+
+        if username and password:
+            user = self.get_user()
+            if not user:
+                raise forms.ValidationError(_("Invalid username or password."))
+            if not user.is_active:
+                raise forms.ValidationError(_("This account is inactive."))
+        return cleaned_data
 
 
 class BaseProfileForm(forms.ModelForm):

@@ -15,10 +15,18 @@
                         </h3>
                     </div>
                     <div class="card-body">
+                        <!-- Display Non-Field Errors -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
                         <!-- Registration Form -->
                         <form method="post">
                             {% csrf_token %}
-                            {{ form.non_field_errors }}
 
                             {% for field in form %}
                                 <div class="form-group mb-3">
@@ -64,120 +72,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <h4><i class="fas fa-info-circle me-2"></i> Our Terms and Conditions</h4>
-                    <p>
-                    <h4>Terms and Conditions</h4>
-                    <p><strong>Last Updated:</strong> 01.11.2024 </p>
-
-                    <p>Welcome to Equity Optimizer. By registering an account or using our services, you agree to comply
-                        with and be bound by the following Terms and Conditions. Please read them carefully.</p>
-
-                    <h5>1. Acceptance of Terms</h5>
-                    <p>By accessing and using Equity Optimizer, you agree to be bound by these Terms and Conditions. If
-                        you do not agree, please refrain from using our services. We reserve the right to update these
-                        terms at any time without prior notice.</p>
-
-                    <h5>2. Description of Services</h5>
-                    <p>Equity Optimizer provides tools for stock analysis, portfolio management, and optimization using
-                        historical financial data from sources like Yahoo Finance. Users can create stock lists, build
-                        portfolios, and run simulations using financial models such as the Harry Markowitz Efficient
-                        Frontier model.</p>
-
-                    <h5>3. User Responsibilities</h5>
-                    <ul>
-                        <li>You are responsible for providing accurate information, including stock tickers and personal
-                            details during registration.
-                        </li>
-                        <li>You agree to use Equity Optimizer for lawful purposes and not engage in disruptive
-                            activities.
-                        </li>
-                        <li>Maintain the confidentiality of your account credentials; you are responsible for all
-                            activities conducted under your account.
-                        </li>
-                    </ul>
-
-                    <h5>4. Financial Data and Market Information</h5>
-                    <p>Equity Optimizer relies on external data providers for stock prices and currency exchange rates.
-                        We do not guarantee the accuracy, completeness, or timeliness of the data. The analysis provided
-                        is for educational purposes only and does not constitute investment advice. Users should consult
-                        a qualified financial advisor before making investment decisions.</p>
-
-                    <h5>5. Currency Conversion</h5>
-                    <p>Equity Optimizer handles stocks traded in different currencies using exchange rates from trusted
-                        sources. Historical exchange rates may not reflect real-time rates, and we are not liable for
-                        discrepancies due to currency fluctuations.</p>
-
-                    <h5>6. Privacy Policy</h5>
-                    <p>We value your privacy and are committed to protecting your personal information. By using Equity
-                        Optimizer, you consent to the collection, use, and processing of your data as described
-                        below:</p>
-                    <ul>
-                        <li><strong>Data Collection:</strong> We collect personal information such as your name, email
-                            address, and account details during registration. We also gather usage data to improve our
-                            services.
-                        </li>
-                        <li><strong>Data Usage:</strong> Your data is used to personalize your experience, provide
-                            analytical tools, and enhance service functionality. We may use anonymized data for research
-                            and performance analysis.
-                        </li>
-                        <li><strong>Data Sharing:</strong> We do not sell or share your personal information with third
-                            parties, except as required by law or to provide integrated services (e.g., financial data
-                            from Yahoo Finance).
-                        </li>
-                        <li><strong>Data Security:</strong> We implement industry-standard security measures to protect
-                            your data. However, we cannot guarantee complete security and are not responsible for
-                            unauthorized access due to factors beyond our control.
-                        </li>
-                        <li><strong>Cookies:</strong> We use cookies to enhance your experience. You can manage cookie
-                            preferences through your browser settings.
-                        </li>
-                    </ul>
-
-                    <h5>7. User-Generated Content</h5>
-                    <p>By creating stock lists, portfolios, or submitting comments, you grant Equity Optimizer the right
-                        to use and display your content as part of our services. You are responsible for the content you
-                        submit and agree not to post offensive or defamatory material.</p>
-
-                    <h5>8. Disclaimer of Warranties</h5>
-                    <p>Equity Optimizer provides its services on an "as-is" basis without warranties of any kind. We do
-                        not guarantee the accuracy or reliability of the app's content. The app may experience
-                        interruptions, and we do not guarantee uninterrupted access.</p>
-
-                    <h5>9. Limitation of Liability</h5>
-                    <p>In no event shall Equity Optimizer or its affiliates be liable for any direct, indirect,
-                        incidental, or consequential damages arising from the use of our services. Users acknowledge
-                        that financial markets involve risks, and the app is not responsible for financial losses
-                        resulting from its analysis.</p>
-
-                    <h5>10. Intellectual Property</h5>
-                    <p>All content, graphics, and trademarks on Equity Optimizer are the intellectual property of the
-                        app and its creators. Users may not reproduce or distribute content without permission.</p>
-
-                    <h5>11. Account Termination</h5>
-                    <p>We reserve the right to suspend or terminate your account if you violate these terms. You may
-                        delete your account at any time. Upon termination, your data may be permanently deleted.</p>
-
-                    <h5>12. Indemnification</h5>
-                    <p>You agree to indemnify and hold Equity Optimizer harmless from any claims, damages, or losses
-                        arising from your use of the app or violation of these terms.</p>
-
-                    <h5>13. Governing Law</h5>
-                    <p>These Terms and Conditions are governed by the laws of Bulgaria. Any disputes shall
-                        be subject to the jurisdiction of the courts in Bulgaria.</p>
-
-                    <h5>14. Changes to Terms and Conditions</h5>
-                    <p>We reserve the right to modify these Terms and Conditions. Changes will be posted on this page,
-                        and continued use of the app constitutes acceptance of the updated terms.</p>
-
-                    <h5>15. Contact Us</h5>
-                    <p>If you have questions about these Terms and Conditions, please contact us
-                        at {% url 'contact' %}.</p>
-
-                    <hr>
-                    <p><em>Disclaimer: This document is for informational purposes and should be reviewed by a legal
-                        professional for compliance with local regulations.</em></p>
-
-                    </p>
+                    <!-- Terms content here -->
                 </div>
                 <div class="modal-footer d-flex justify-content-center">
                     <button type="button" class="btn btn-secondary btn-lg rounded-pill" data-bs-dismiss="modal">

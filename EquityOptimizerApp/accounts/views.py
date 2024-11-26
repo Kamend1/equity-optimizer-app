@@ -13,16 +13,18 @@ from EquityOptimizerApp.mixins import ObjectOwnershipRequiredMixin
 
 
 # Create your views here.
-class RegisterView(FormView):
-    template_name = 'registration/register.html'
-    form_class = CustomUserCreationForm
-    success_url = reverse_lazy('home')  # Redirect to 'home' after successful registration
-
-    def form_valid(self, form):
-        user = form.save()
-        Profile.objects.create(user=user)
-        login(self.request, user)
-        return super().form_valid(form)
+def register(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Registration successful! Please log in.")
+            return redirect('login')
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
@@ -90,13 +92,9 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 
 
 # Custom Password Change
-class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+class CustomPasswordChangeView(PasswordChangeView):
     template_name = 'registration/custom_password_change.html'
     success_url = reverse_lazy('password_change_done')
-
-    def handle_no_permission(self):
-        messages.error(self.request, "You do not have permission to change this password.")
-        return redirect('login')  # Redirect to
 
 
 class CustomPasswordChangeDoneView(LoginRequiredMixin, PasswordChangeDoneView):
