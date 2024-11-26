@@ -23,15 +23,15 @@ class UserStockListCreateView(LoginRequiredMixin, CreateView):
         stock_ids = self.request.POST.getlist('stocks')
 
         if stock_ids and 5 <= len(stock_ids) <= 50:
-            form.instance.stocks.set(stock_ids)
+
             response = super().form_valid(form)
+            form.instance.stocks.set(stock_ids)
             return response
 
         else:
+
             form.add_error(None, "You must select between 5 and 50 stocks.")
             return self.form_invalid(form)
-
-        return response
 
 
 @login_required
