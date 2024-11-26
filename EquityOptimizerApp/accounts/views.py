@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.contrib.auth import login
 from django.contrib import messages
@@ -17,9 +17,10 @@ def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Registration successful! Please log in.")
-            return redirect('login')
+            user = form.save()  # Save the new user instance
+            login(request, user)  # Log the user in after successful registration
+            messages.success(request, "Registration successful! You are now logged in.")
+            return redirect('home')  # Redirect to the desired page, e.g., 'home'
         else:
             messages.error(request, "Please fix the errors below.")
     else:
