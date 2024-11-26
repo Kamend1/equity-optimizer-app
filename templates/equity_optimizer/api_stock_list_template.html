@@ -73,7 +73,7 @@
                     }
                 },
                 "columns": [
-                    {"data": "ticker", "render": data => `<a href="/stocks/${data}">${data}</a>`},
+                    {"data": "ticker", "render": data => `<a href="/stocks/stocks/${data}">${data}</a>`},
                     {"data": "name"},
                     {"data": "sector"},
                     {"data": "latest_adj_close", "render": data => data ? `$${parseFloat(data).toFixed(2)}` : "0.00"},
