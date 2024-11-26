@@ -1,59 +1,91 @@
 # Equity Optimizer App
 
-![Logo](static/images/logo.png)
+This project is deployed to Heroku and is available for testing at the following address: [https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/). It comes preloaded with over 400 stock tickers for immediate use.
 
-## Overview
+## About
 
-The **Equity Optimizer App** is a comprehensive tool designed for investors and financial analysts. It helps users analyze stocks, perform portfolio simulations, and optimize their investment strategies using historical financial data. The application supports a wide range of features, including stock performance analysis, Monte Carlo simulations, currency exchange rates, and portfolio management. This is my capstone project for the Python Database and Python Web Modules at SOFTUNI, part of the Web Development track.
+The Equity Optimizer App is designed to help users analyze and optimize their stock portfolios. The application provides a range of features to track stock performance and evaluate investment strategies.
 
 ## Features
 
-- **User Authentication**: Secure registration and login for users to access personalized features.
-- **Stock Analysis**: In-depth analysis of various stocks, including financial metrics, trends, and visualizations.
-- **Currency Support**: The app maintains exchange rates for global currencies, converting them to a base currency (USD). This allows users to analyze stocks traded on international markets.
-- **Yahoo Finance API Integration**: Stock and currency data are sourced from the free Yahoo Finance API, allowing users to browse up-to-date information.
-- **Favorite Stock Lists**: Users can create multiple lists of favorite stocks, organizing them into collections for easier analysis.
-- **Monte Carlo Simulation**: Users can select between 5 and 50 stocks from their favorite lists to perform a Monte Carlo simulation. The simulation analyzes historical data for a specified time interval and attempts up to 20,000 runs to identify the most efficient risk/return portfolio.
-- **Portfolio Management**: Users can save, track, and maintain multiple portfolios based on the results of the simulations. Detailed value histories and performance analytics are provided.
-- **Search and Filter**: Powerful search and filter options for finding specific stocks quickly.
-- **Sorting Options**: Users can sort stock data based on various financial metrics in ascending or descending order.
-- **Pagination**: Smooth navigation through large lists of stocks using pagination.
+- User authentication and profile management
+- Add and manage stocks in a portfolio
+- View stock details and performance metrics
+- Generate detailed reports for analysis
+- Responsive design for all devices
 
-## Technologies Used
+## Installation
 
-- **Django**: Web framework for building the application backend.
-- **Bootstrap**: Responsive design and UI components for a polished user interface.
-- **Python**: The primary programming language for backend logic and data processing.
-- **HTML/CSS**: Markup and styling for the frontend presentation.
-- **PostgreSQL**: Database used to store stock and currency data (can be replaced with another DB setup).
-- **Yahoo Finance API**: Provides real-time and historical stock and currency data, which are integrated into the app.
+To set up the app locally or for deployment, follow these steps:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Kamend1/equity-optimizer-app.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd equity-optimizer-app
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Apply migrations:
+   ```bash
+   python manage.py migrate
+   ```
+
+5. Update `settings.py` for PostgreSQL configuration:
+   Replace the default database settings with:
+   ```python
+   DATABASES = {
+       'default': {
+           'ENGINE': 'django.db.backends.postgresql',
+           'NAME': '<your-db-name>',
+           'USER': '<your-db-user>',
+           'PASSWORD': '<your-db-password>',
+           'HOST': 'localhost',
+           'PORT': '5432',
+       }
+   }
+   ```
+
+6. Configure other necessary settings in `settings.py`:
+   - Set `DEBUG = True` for local development.
+   - Update `ALLOWED_HOSTS`:
+     ```python
+     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+     ```
+   - Configure email backend for notifications (optional):
+     ```python
+     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+     EMAIL_HOST = '<your-email-host>'
+     EMAIL_PORT = 587
+     EMAIL_USE_TLS = True
+     EMAIL_HOST_USER = '<your-email-username>'
+     EMAIL_HOST_PASSWORD = '<your-email-password>'
+     ```
+
+7. Run the development server:
+   ```bash
+   python manage.py runserver
+   ```
 
 ## Usage
 
-Once the app is running, you can:
+Visit `http://127.0.0.1:8000/` in your browser to access the application. Sign up for an account, and start adding stocks to your portfolio.
 
-1. **Register or Log In**: Create a new user account or log in to access personalized features.
-2. **Browse Stocks and Currencies**: Use the search and filter options to explore various stocks and view currency exchange rates.
-3. **Create Favorite Stock Lists**: Organize your chosen stocks into multiple favorite lists for easier tracking and analysis.
-4. **Perform Monte Carlo Simulations**: Select a list of favorite stocks, specify a time interval and the number of simulation runs, and let the app identify the most efficient portfolio using the Harry Markowitz Efficient Frontier model.
-5. **Manage Portfolios**: Save and monitor your portfolios, review historical performance, and track the value changes over time.
+## Testing
 
-## Currency and Exchange Rate Support
-
-The app supports analysis of stocks from markets outside the US by maintaining exchange rates for global currencies. The exchange rates are converted to a base currency (USD), ensuring accurate and consistent analysis. This feature is integrated with the Yahoo Finance API, providing users with real-time and historical currency data.
-
-## Contributing
-
-Contributions are welcome! If you have suggestions, new features, or improvements, please fork the repository, make your changes, and submit a pull request. We appreciate community involvement.
+The app is deployed on Heroku and available for testing at the following link: [https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/).
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for more information.
-
-## Contact
-
-For inquiries, please reach out to me at **kamendd@hotmail.com**.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
 ---
 
-<em>Disclaimer: This app is intended for educational and testing purposes only. It does not provide investment advice and should not be used as a sole source for making investment decisions. Always consult with a qualified financial advisor before making any financial decisions.</em>
+For any queries or support, please contact [kamendd@hotmail.com](mailto:kamendd@hotmail.com).
