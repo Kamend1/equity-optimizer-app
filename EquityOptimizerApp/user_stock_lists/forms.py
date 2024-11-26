@@ -7,7 +7,6 @@ class FavoriteStockListForm(forms.ModelForm):
         model = FavoriteStockList
         fields = ['name', 'description']
 
-        # Customizing form fields with labels, widgets, and placeholders
         labels = {
             'name': 'List Name',
             'description': 'Description',
@@ -26,3 +25,17 @@ class FavoriteStockListForm(forms.ModelForm):
                 'placeholder': 'E.g., This list includes my favorite technology stocks.',
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.stocks = kwargs.pop('stocks', [])
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not self.stocks:
+            raise forms.ValidationError("You must select at least 5 stocks.")
+        if len(self.stocks) < 5:
+            raise forms.ValidationError("A favorite stock list must contain at least 5 stocks.")
+        if len(self.stocks) > 50:
+            raise forms.ValidationError("A favorite stock list cannot contain more than 50 stocks.")
+        return cleaned_data
