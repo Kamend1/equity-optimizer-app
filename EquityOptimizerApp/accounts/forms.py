@@ -13,7 +13,6 @@ class CustomLoginForm(AuthenticationForm):
     )
     password = forms.CharField(
         label='Password',
-        widget=forms.PasswordInput(attrs={'autocomplete': 'current-password'})
     )
 
 

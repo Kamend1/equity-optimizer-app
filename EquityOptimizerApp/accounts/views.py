@@ -95,7 +95,15 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 # Custom Password Change
 class CustomPasswordChangeView(PasswordChangeView):
     template_name = 'registration/custom_password_change.html'
-    success_url = reverse_lazy('password_change_done')
+    success_url = reverse_lazy('password_change_done')  # Ensure this name matches urls.py
+
+    def form_valid(self, form):
+        messages.success(self.request, "Your password has been changed successfully.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Please correct the errors below.")
+        return super().form_invalid(form)
 
 
 class CustomPasswordChangeDoneView(LoginRequiredMixin, PasswordChangeDoneView):
