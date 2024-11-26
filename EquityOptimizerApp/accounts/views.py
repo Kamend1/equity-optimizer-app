@@ -44,7 +44,6 @@ class ProfileEditView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, UpdateVi
     model = Profile
     template_name = 'registration/profile_edit.html'
     form_class = ProfileEditForm
-    success_url = reverse_lazy('profile_details')
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -67,6 +66,9 @@ class ProfileEditView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, UpdateVi
         profile.save()
 
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('profile_details', kwargs={'pk': self.object.pk})
 
 
 class CustomPasswordResetView(PasswordResetView):
