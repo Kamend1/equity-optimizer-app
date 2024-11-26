@@ -90,16 +90,13 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 
 
 # Custom Password Change
-class CustomPasswordChangeView(LoginRequiredMixin, UserPassesTestMixin, PasswordChangeView):
+class CustomPasswordChangeView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, PasswordChangeView):
     template_name = 'registration/custom_password_change.html'
     success_url = reverse_lazy('password_change_done')
 
-    def test_func(self):
-        return self.request.user.is_authenticated
-
     def handle_no_permission(self):
-        from django.core.exceptions import PermissionDenied
-        raise PermissionDenied("You do not have permission to change this password.")
+        messages.error(self.request, "You do not have permission to change this password.")
+        return redirect('login')  # Redirect to
 
 
 class CustomPasswordChangeDoneView(LoginRequiredMixin, PasswordChangeDoneView):
