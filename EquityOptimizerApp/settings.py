@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
+    'django_celery_results',
+    'django_celery_beat',
+
     'rest_framework',
     "corsheaders",
 
@@ -58,7 +61,6 @@ INSTALLED_APPS = [
     'EquityOptimizerApp.accounts',
     'EquityOptimizerApp.user_stock_lists',
     'EquityOptimizerApp.currencies',
-
 ]
 
 MIDDLEWARE = [
@@ -205,6 +207,15 @@ SESSION_COOKIE_SECURE = True
 LOGOUT_REDIRECT_URL = reverse_lazy('login')
 LOGIN_REDIRECT_URL = reverse_lazy('home')
 LOGIN_URL = reverse_lazy('login')
+
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+if DEBUG:
+    CELERY_RESULT_BACKEND = 'django-db'
+
 
 LOGGING = {
     'version': 1,
