@@ -1,9 +1,9 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.contrib.auth import login
 from django.contrib import messages
-from django.views.generic import FormView, DetailView, UpdateView, DeleteView
+from django.views.generic import DetailView, UpdateView, DeleteView
 from django.contrib.auth.views import (PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView,
                                        PasswordResetCompleteView, PasswordChangeView, PasswordChangeDoneView)
 
@@ -17,11 +17,13 @@ def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()  # Save the new user instance
-            login(request, user)  # Log the user in after successful registration
-            messages.success(request, "Registration successful! You are now logged in.")
-            return redirect('home')  # Redirect to the desired page, e.g., 'home'
+            user = form.save()
+            Profile.objects.create(user=user)
+            login(request, user)
+            messages.success(request, "Registration successful!")
+            return redirect('home')
         else:
+            print(form.errors)
             messages.error(request, "Please fix the errors below.")
     else:
         form = CustomUserCreationForm()
