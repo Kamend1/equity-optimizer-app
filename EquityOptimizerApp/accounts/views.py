@@ -90,7 +90,7 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 
 
 # Custom Password Change
-class CustomPasswordChangeView(LoginRequiredMixin, ObjectOwnershipRequiredMixin, PasswordChangeView):
+class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     template_name = 'registration/custom_password_change.html'
     success_url = reverse_lazy('password_change_done')
 
