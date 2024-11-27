@@ -19,9 +19,9 @@ class StockUpdateService:
     def update_stock_data():
         batch_size = 30
         stocks = stock_service.get_all_listed_stocks()
-        stock_objects = []
 
         for i in range(0, len(stocks), batch_size):
+            stock_objects = []
             batch = stocks[i:i + batch_size]
             try:
                 min_date = datetime(2100, 1, 1).date()
@@ -124,8 +124,8 @@ class StockUpdateService:
                 print(f"Failed to update stock data: {e}")
 
             print(start_date, min_date, formatted_date)
-            stock_data_objects = stock_data_service.download_and_save_stock_data(stocks, formatted_date)
-            stock_data_service.update_stock_data_trend_daily_return(formatted_date)
+            stock_data_objects = stock_data_service.download_and_save_stock_data(batch, formatted_date)
+
 
             with transaction.atomic():
                 Stock.objects.bulk_update(
@@ -145,5 +145,6 @@ class StockUpdateService:
                 )
 
                 print(f"Stock data batch {i} updated successfully.")
+        stock_data_service.update_stock_data_trend_daily_return(formatted_date)
         print("Stock data updated successfully.")
         return stock_data_objects
