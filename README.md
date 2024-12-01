@@ -13,7 +13,7 @@ The Equity Optimizer App is designed to help users analyze and optimize their st
 - View stock details and performance metrics
 - Generate detailed reports for analysis
 - Responsive design for all devices
-- API features for advanced integrations and data access ([API Documentation](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/api/docs))
+- API features for advanced integrations and data access ([API Documentation - Production](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/api/docs), [API Documentation - Local](http://127.0.0.1:8000/api/docs/))
 
 ## Installation
 
