@@ -1,6 +1,7 @@
 import pandas as pd
 from django.db import transaction
 from django.db.models import Count
+from pandas._libs.tslibs.offsets import BDay
 
 from EquityOptimizerApp.currencies.models import ExchangeRate
 from EquityOptimizerApp.currencies.services.exchange_rate_service import ExchangeRateService
@@ -268,6 +269,7 @@ class StockDataService:
     def clean_and_align_data(close_price_df, start_date, end_date):
         all_dates = pd.date_range(start=start_date, end=end_date, freq='B')
         close_price_df = close_price_df.reindex(all_dates)
+        close_price_df.fillna(method='bfill', inplace=True)
         close_price_df.fillna(method='ffill', inplace=True)
         close_price_df.fillna(0.00, inplace=True)
         close_price_df.reset_index(inplace=True)
@@ -276,12 +278,13 @@ class StockDataService:
 
     @staticmethod
     def fetch_stock_data(stock_symbols, start_date='2010-01-01', end_date=None):
+
+        start_date = pd.to_datetime(start_date) + BDay(0)
+        end_date = pd.to_datetime(end_date) if end_date else pd.Timestamp.now()
+
         try:
             if not stock_symbols:
                 raise ValueError("No stock symbols provided.")
-
-            start_date = pd.to_datetime(start_date)
-            end_date = pd.to_datetime(end_date) if end_date else pd.Timestamp.now()
 
             # Step 1: Fetch data from the database
             try:
@@ -297,6 +300,7 @@ class StockDataService:
                 print("Converting stock data to DataFrame...")
                 close_price_df = StockDataService.convert_to_dataframe(stock_data)
                 print(f"Step 2 - DataFrame created with shape: {close_price_df.shape}")
+                print(close_price_df)
             except Exception as e:
                 print(f"Error in Step 2 - Converting to DataFrame: {str(e)}")
                 raise ValueError(f"Failed to convert stock data to DataFrame: {str(e)}")
@@ -305,6 +309,7 @@ class StockDataService:
             try:
                 print("Validating common start and end dates across stocks...")
                 StockDataService.validate_common_dates(close_price_df, stock_symbols, start_date, end_date)
+                print(close_price_df)
                 print("Step 3 - Date validation completed successfully")
             except Exception as e:
                 print(f"Error in Step 3 - Validating dates: {str(e)}")
@@ -314,6 +319,7 @@ class StockDataService:
             try:
                 print("Cleaning and aligning stock data...")
                 close_price_df = StockDataService.clean_and_align_data(close_price_df, start_date, end_date)
+                print(close_price_df)
                 print(f"Step 4 - Data cleaned and aligned. Final DataFrame shape: {close_price_df.shape}")
             except Exception as e:
                 print(f"Error in Step 4 - Cleaning and aligning data: {str(e)}")
@@ -368,7 +374,9 @@ class StockDataService:
     def update_stock_data_trend_daily_return(date):
 
         queryset = StockData.objects.filter(date__gt=date)
+
         stock_data_objects = []
+
         for stock_data in queryset:
             # current_stock = Stock.objects.filter(pk=stock_data.stock).first()
 
