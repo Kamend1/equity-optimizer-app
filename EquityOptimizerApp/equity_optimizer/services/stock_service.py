@@ -38,8 +38,9 @@ class StockService:
     def add_stock_to_db(self, ticker):
         info = self.fetcher.fetch_stock_info(ticker)
 
-        if not info:
-            raise ValueError("No data returned from yfinance.")
+        if not info or 'shortName' not in info or 'sector' not in info:
+            raise ValueError(f"No valid data returned for ticker '{ticker}' from Yahoo Finance. "
+                             f"Double check on Yahoo Finance and try again!")
 
         ex_dividend_date = parse_date(info.get('exDividendDate'))
         last_dividend_date = parse_date(info.get('lastDividendDate'))

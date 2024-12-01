@@ -17,8 +17,14 @@
                 {% if messages %}
                     <div class="mb-4">
                         {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} rounded-pill">
-                                <i class="fas fa-info-circle me-2"></i>{{ message }}
+                            <div class="alert rounded-pill 
+                                {% if 'success' in message.tags %}alert-success
+                                {% elif 'error' in message.tags %}alert-danger
+                                {% else %}alert-info{% endif %}">
+                                <i class="{% if 'success' in message.tags %}fas fa-check-circle
+                                   {% elif 'error' in message.tags %}fas fa-exclamation-circle
+                                   {% else %}fas fa-info-circle{% endif %} me-2"></i>
+                                {{ message }}
                             </div>
                         {% endfor %}
                     </div>
@@ -34,10 +40,10 @@
                     </div>
 
                     <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-success btn-lg rounded-pill">
+                        <button type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm">
                             <i class="fas fa-check-circle"></i> Add Stock
                         </button>
-                        <a href="{% url 'stock_list' %}" class="btn btn-secondary btn-lg rounded-pill ms-3">
+                        <a href="{% url 'stock_list' %}" class="btn btn-secondary btn-lg rounded-pill shadow-sm ms-3">
                             <i class="fas fa-arrow-left"></i> Back to Stock List
                         </a>
                     </div>
@@ -46,7 +52,7 @@
         </div>
     </div>
 
-    <!-- Include Bootstrap and FontAwesome from CDN if not already included -->
+    <!-- Include Bootstrap and FontAwesome from CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>

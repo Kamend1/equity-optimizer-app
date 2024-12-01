@@ -1,6 +1,5 @@
 from django import forms
 from datetime import date
-from django.core.exceptions import ValidationError
 from ..user_stock_lists.models import FavoriteStockList
 
 
