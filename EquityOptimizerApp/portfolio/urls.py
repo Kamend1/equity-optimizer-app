@@ -2,7 +2,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('personal-portfolios', views.PersonalPortfolioListView.as_view(), name='personal-portfolios'),
+    path('personal-portfolios/', views.PersonalPortfolioListView.as_view(), name='personal-portfolios'),
     path('public-portfolios/', views.PublicPortfolioListView.as_view(), name='public-portfolios'),
 
     path('<int:portfolio_id>/', include([
