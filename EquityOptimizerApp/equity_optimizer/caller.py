@@ -11,7 +11,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'EquityOptimizerApp.settings')  
 django.setup()
 
 from EquityOptimizerApp.equity_optimizer.models import Stock, StockData
-from EquityOptimizerApp.equity_optimizer.services import check_stock_exists, add_stock_to_db, download_and_save_stock_data
+# from EquityOptimizerApp.equity_optimizer.services import check_stock_exists, add_stock_to_db, download_and_save_stock_data
 
 
 def manually_update_stock_data(date):
