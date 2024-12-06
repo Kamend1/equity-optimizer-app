@@ -9,6 +9,7 @@ import yfinance as yf
 import csv
 
 from EquityOptimizerApp import settings
+from EquityOptimizerApp.equity_optimizer.services import StockService, YFinanceFetcher
 
 # Step 1: Set up Django settings environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'EquityOptimizerApp.settings')  # Replace 'your_project' with your actual project name
@@ -128,6 +129,74 @@ def upload_stock_data_from_csv(date):
         print(f"An error occurred while processing the file: {e}")
 
 
+# def export_tickers_to_csv():
+#
+#     try:
+#
+#         data_dir = os.path.join(settings.BASE_DIR, 'data')
+#         os.makedirs(data_dir, exist_ok=True)
+#
+#         file_path = os.path.join(data_dir, 'tickers.csv')
+#
+#         tickers = Stock.objects.values_list('ticker', flat=True)
+#
+#         with open(file_path, mode='w', newline='', encoding='utf-8') as file:
+#             writer = csv.writer(file)
+#             writer.writerow(['ticker'])  # Write header
+#             for ticker in tickers:
+#                 writer.writerow([ticker])  # Write each ticker
+#
+#         print(f"Tickers successfully exported to {file_path}")
+#         return file_path
+#
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+#         return None
 
-upload_stock_data_from_csv('2024-11-28')
+def process_tickers_from_csv():
+    """
+    Reads tickers from a CSV file and processes them using the StockService.
+    """
+    # Initialize the StockService with a DataFetcher instance
+    fetcher = YFinanceFetcher()  # Replace with your actual fetcher
+    stock_service = StockService(fetcher)
+
+    data_dir = os.path.join(settings.BASE_DIR, 'data')
+    csv_file_path = os.path.join(data_dir, 'tickers.csv')
+
+
+    try:
+        with open(csv_file_path, mode='r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            header = next(reader)  # Skip the header row
+
+            if 'ticker' not in header:
+                raise ValueError("CSV file must contain a 'ticker' column.")
+
+            for row in reader:
+                try:
+                    ticker = row[header.index('ticker')].strip()
+                    if not ticker:
+                        print("Skipping empty ticker.")
+                        continue
+
+                    if stock_service.check_stock_exists(ticker):
+                        print(f"Stock with ticker '{ticker}' already exists. Skipping.")
+                        continue
+
+                    # Add the stock to the database
+                    stock = stock_service.add_stock_to_db(ticker)
+                    print(f"Successfully added stock: {stock.ticker}")
+
+                except Exception as e:
+                    print(f"Error processing ticker '{ticker}': {e}")
+
+    except FileNotFoundError:
+        print(f"File not found at location: {csv_file_path}")
+    except Exception as e:
+        print(f"An error occurred while processing the file: {e}")
+
+
+# upload_stock_data_from_csv('2024-11-28')
 # save_stock_data_to_csv('2024-11-28')
+process_tickers_from_csv()
