@@ -46,17 +46,19 @@ def get_manually_stock_data(ticker, start_date):
 
 
 def save_stock_data_to_csv(date):
-
     try:
         target_date = datetime.strptime(date, '%Y-%m-%d').date()
 
-        stock_data_queryset = StockData.objects.filter(date__gte=target_date)
+        stock_data_queryset = StockData.objects.filter(date__gte=target_date).select_related('stock')
 
         if not stock_data_queryset.exists():
             print(f"No records found for date >= {target_date}.")
             return None
 
-        stock_data = list(stock_data_queryset.values())
+        stock_data = stock_data_queryset.values(
+            'id', 'stock__ticker', 'date', 'open', 'high', 'low', 'close',
+            'adj_close', 'volume', 'daily_return', 'trend', 'adj_close_to_usd'
+        )
         df = pd.DataFrame(stock_data)
 
         data_dir = os.path.join(settings.BASE_DIR, 'data')
@@ -79,20 +81,17 @@ def save_stock_data_to_csv(date):
 
 
 def upload_stock_data_from_csv(date):
-
     data_dir = os.path.join(settings.BASE_DIR, 'data')
-    csv_file_path = data_dir + '/' + f"stock_data_{date}.csv"
-
+    csv_file_path = os.path.join(data_dir, f"stock_data_{date}.csv")
 
     try:
-
         with open(csv_file_path, mode="r", encoding="utf-8") as file:
             reader = csv.DictReader(file)
 
-
             for row in reader:
                 try:
-                    stock = Stock.objects.get(id=row["stock_id"])
+                    # Fetch the stock using the ticker from the CSV
+                    stock = Stock.objects.get(ticker=row["stock__ticker"])
 
                     StockData.objects.update_or_create(
                         id=row["id"],
@@ -111,7 +110,7 @@ def upload_stock_data_from_csv(date):
                         },
                     )
                 except Stock.DoesNotExist:
-                    print(f"Stock with ID {row['stock_id']} does not exist. Skipping row.")
+                    print(f"Stock with ticker {row['stock__ticker']} does not exist. Skipping row.")
                 except Exception as e:
                     print(f"Error processing row with ID {row['id']}: {e}")
 
@@ -129,5 +128,6 @@ def upload_stock_data_from_csv(date):
         print(f"An error occurred while processing the file: {e}")
 
 
-upload_stock_data_from_csv('2024-12-05')
-# save_stock_data_to_csv('2024-12-05')
+
+upload_stock_data_from_csv('2024-11-28')
+# save_stock_data_to_csv('2024-11-28')
