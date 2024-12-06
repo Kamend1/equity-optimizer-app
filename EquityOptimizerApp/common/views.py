@@ -36,7 +36,7 @@ def contact(request):
             email = form.cleaned_data['email']
             message = form.cleaned_data['message']
 
-            # Compose the email content
+
             subject = f"New Contact Form Submission from {name}"
             email_message = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
 
@@ -44,15 +44,15 @@ def contact(request):
                 send_mail(
                     subject,
                     email_message,
-                    settings.DEFAULT_FROM_EMAIL,  # Sender's email address (configured in settings.py)
-                    [settings.CONTACT_EMAIL],  # Recipient's email address (configured in settings.py)
+                    settings.DEFAULT_FROM_EMAIL,
+                    [settings.CONTACT_EMAIL],
                     fail_silently=False,
                 )
 
             except Exception as e:
                 print("Error sending email:", e)
 
-            return redirect('contact_success')  # Replace with your success URL
+            return redirect('contact_success')
 
     else:
         form = ContactForm(user=request.user)

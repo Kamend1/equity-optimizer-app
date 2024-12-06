@@ -1,10 +1,14 @@
 import os
+import shutil
 import django
-from datetime import timedelta
+from datetime import timedelta, datetime
+
+import pandas as pd
 from django.utils.timezone import now
 import yfinance as yf
 import csv
 
+from EquityOptimizerApp import settings
 
 # Step 1: Set up Django settings environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'EquityOptimizerApp.settings')  # Replace 'your_project' with your actual project name
@@ -41,46 +45,56 @@ def get_manually_stock_data(ticker, start_date):
     return data
 
 
-def add_stock(tickers):
+def save_stock_data_to_csv(date):
 
-    for ticker in tickers:
-        if ticker:
-            # Check if the stock already exists
-            if check_stock_exists(ticker):
-                print(f'Stock with ticker {ticker} already exists')
-                continue
-            else:
-                try:
-                    # Add the stock to the database
-                    stock = add_stock_to_db(ticker)
-                    # Download and save the historical stock data
-                    download_and_save_stock_data(stock)
-                except Exception as e:
-                    # Handle the case where data retrieval fails
-                    print(f'Failed to retrieve data for ticker {ticker}. Error: {str(e)}')
-
-csv_file_path = "data/stock_data_2024_11_28.csv"
-
-def upload_stock_data_from_csv(csv_file_path):
-    """
-    Reads a CSV file and uploads the data to the database.
-
-    :param csv_file_path: Path to the CSV file.
-    """
     try:
-        # Open the CSV file
+        target_date = datetime.strptime(date, '%Y-%m-%d').date()
+
+        stock_data_queryset = StockData.objects.filter(date__gte=target_date)
+
+        if not stock_data_queryset.exists():
+            print(f"No records found for date >= {target_date}.")
+            return None
+
+        stock_data = list(stock_data_queryset.values())
+        df = pd.DataFrame(stock_data)
+
+        data_dir = os.path.join(settings.BASE_DIR, 'data')
+        os.makedirs(data_dir, exist_ok=True)
+
+        file_name = f"stock_data_{date}.csv"
+        file_path = os.path.join(data_dir, file_name)
+
+        df.to_csv(file_path, index=False)
+
+        print(f"Stock data saved to {file_path}")
+        return file_path
+
+    except ValueError as e:
+        print(f"Invalid date format: {e}. Please use 'YYYY-MM-DD'.")
+        return None
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+
+
+def upload_stock_data_from_csv(date):
+
+    csv_file_path = save_stock_data_to_csv(date)
+    data_dir = os.path.dirname(csv_file_path)
+
+    try:
+
         with open(csv_file_path, mode="r", encoding="utf-8") as file:
             reader = csv.DictReader(file)
 
-            # Iterate through each row in the CSV
+
             for row in reader:
                 try:
-                    # Fetch the related Stock object
                     stock = Stock.objects.get(id=row["stock_id"])
 
-                    # Insert or update the StockData object
                     StockData.objects.update_or_create(
-                        id=row["id"],  # Use the same ID for consistency
+                        id=row["id"],
                         defaults={
                             "stock": stock,
                             "date": row["date"],
@@ -102,10 +116,17 @@ def upload_stock_data_from_csv(csv_file_path):
 
         print("Data uploaded successfully.")
 
+        try:
+            shutil.rmtree(data_dir)
+            print(f"Data directory {data_dir} deleted successfully.")
+        except Exception as e:
+            print(f"Error deleting data directory {data_dir}: {e}")
+
     except FileNotFoundError:
         print(f"File not found at location: {csv_file_path}")
     except Exception as e:
         print(f"An error occurred while processing the file: {e}")
 
 
-upload_stock_data_from_csv(csv_file_path)
+upload_stock_data_from_csv('2024-12-05')
+# save_stock_data_to_csv('2024-12-05')
