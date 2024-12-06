@@ -80,8 +80,9 @@ def save_stock_data_to_csv(date):
 
 def upload_stock_data_from_csv(date):
 
-    csv_file_path = save_stock_data_to_csv(date)
-    data_dir = os.path.dirname(csv_file_path)
+    data_dir = os.path.join(settings.BASE_DIR, 'data')
+    csv_file_path = data_dir + '/' + f"stock_data_{date}.csv"
+
 
     try:
 
