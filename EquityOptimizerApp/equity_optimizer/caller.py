@@ -154,11 +154,8 @@ def upload_stock_data_from_csv(date):
 #         return None
 
 def process_tickers_from_csv():
-    """
-    Reads tickers from a CSV file and processes them using the StockService.
-    """
-    # Initialize the StockService with a DataFetcher instance
-    fetcher = YFinanceFetcher()  # Replace with your actual fetcher
+
+    fetcher = YFinanceFetcher()
     stock_service = StockService(fetcher)
 
     data_dir = os.path.join(settings.BASE_DIR, 'data')
@@ -184,7 +181,6 @@ def process_tickers_from_csv():
                         print(f"Stock with ticker '{ticker}' already exists. Skipping.")
                         continue
 
-                    # Add the stock to the database
                     stock = stock_service.add_stock_to_db(ticker)
                     print(f"Successfully added stock: {stock.ticker}")
 
@@ -197,6 +193,42 @@ def process_tickers_from_csv():
         print(f"An error occurred while processing the file: {e}")
 
 
+def find_missing_tickers_in_csv():
+
+    data_dir = os.path.join(settings.BASE_DIR, 'data')
+    csv_file_path = os.path.join(data_dir, 'tickers.csv')
+
+    try:
+
+        heroku_tickers = set(Stock.objects.values_list('ticker', flat=True))
+
+
+        csv_tickers = set()
+        with open(csv_file_path, mode='r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            header = next(reader)
+
+            if 'ticker' not in header:
+                raise ValueError("CSV file must contain a 'ticker' column.")
+
+            for row in reader:
+                ticker = row[header.index('ticker')].strip()
+                if ticker:
+                    csv_tickers.add(ticker)
+
+        missing_tickers = list(heroku_tickers - csv_tickers)
+
+        return missing_tickers
+
+    except FileNotFoundError:
+        print(f"CSV file not found at location: {csv_file_path}")
+        return []
+    except Exception as e:
+        print(f"An error occurred while processing the file: {e}")
+        return []
+
+
 # upload_stock_data_from_csv('2024-11-28')
 # save_stock_data_to_csv('2024-11-28')
-process_tickers_from_csv()
+# process_tickers_from_csv()
+find_missing_tickers_in_csv()
