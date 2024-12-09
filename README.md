@@ -1,28 +1,39 @@
 # Equity Optimizer App
 
-This project is deployed to Heroku and is available for testing at the following address: [https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/). It comes preloaded with over 400 stock tickers for immediate use.
+This project is deployed to Heroku and is available for testing at the following address: [Equity Optimizer App on Heroku](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/). It comes preloaded with over 400 stock tickers for immediate use.
+
+---
 
 ## About
 
-The Equity Optimizer App is designed to help users analyze and optimize their stock portfolios. The application provides a range of features to track stock performance and evaluate investment strategies.
+The **Equity Optimizer App** is designed to help users analyze and optimize their stock portfolios. The application provides a range of features to track stock performance and evaluate investment strategies.
+
+**Note**: Due to the limitations of lower-tier Heroku plans (specifically regarding RAM), simulations should currently be run with no more than **1500 simulation runs** to ensure optimal performance.
+
+---
 
 ## Features
 
-- User authentication and profile management
-- Add and manage stocks in a portfolio
-- View stock details and performance metrics
-- Generate detailed reports for analysis
-- Responsive design for all devices
-- API features for advanced integrations and data access ([API Documentation - Production](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/api/docs), [API Documentation - Local](http://127.0.0.1:8000/api/docs/))
+- **User Authentication and Profile Management**
+- **Portfolio Management**: Add and manage stocks in a portfolio.
+- **Stock Details and Metrics**: View detailed stock performance metrics.
+- **Simulation Reports**: Generate and analyze reports for investment strategies.
+- **Responsive Design**: Accessible on all devices.
+- **API Integration**: Includes robust API features for advanced integrations and data access:
+  - [Production API Documentation](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/api/docs)
+  - [Local API Documentation](http://127.0.0.1:8000/api/docs/)
+- **Asynchronous Email Notifications**: A welcome email is sent asynchronously to new users upon registration using Django signals.
+
+---
 
 ## Installation
 
-To set up the app locally or for deployment, follow these steps:
+### Step-by-Step Guide
 
-1. Clone the repository:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/Kamend1/equity-optimizer-app.git
-   ```
+     ```
 
 2. Navigate to the project directory:
    ```bash
@@ -84,12 +95,27 @@ Visit `http://127.0.0.1:8000/` in your browser to access the application. Sign u
 The app provides an API for advanced integrations and data access. You can explore the API and its features using the provided documentation:
 
 - [API Documentation](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/api/docs)
+- [Local API Documentation](http://127.0.0.1:8000/api/docs/)
 
 The API will continue to be developed to support additional features and enhance user functionality.
 
 ## Testing
 
 The app is deployed on Heroku and available for testing at the following link: [https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/).
+
+## Additional Information
+
+### Asynchronous Email Notification:
+
+The accounts app includes a Django signal that triggers an asynchronous welcome email upon user registration. This ensures a smooth onboarding experience for new users.
+
+### Simulation Restrictions:
+
+Simulations on Heroku should be limited to 1500 runs due to RAM constraints on lower-tier plans.
+
+### SoftUni Graders:
+
+For your convenience, the project defense PowerPoint presentation file is included in the repository root directory as project_defense.pptx.
 
 ## License
 
