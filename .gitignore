@@ -2,7 +2,7 @@
 .env
 .venv
 .idea
-__pychache__/
+__pycache__/
 **/__pycache__/
 # Celery Beat scheduler files
 celerybeat-schedule.*

@@ -85,7 +85,64 @@ The **Equity Optimizer App** is designed to help users analyze and optimize thei
      EMAIL_HOST_PASSWORD = '<your-email-password>'
      ```
 
-7. Run the development server:
+7. Celery and Redis Configuration
+
+This project uses Celery for asynchronous task management and Redis as the message broker and result backend. Before running the application, ensure that you have Redis installed and running on your system.
+
+### Environment Variables
+The following environment variables need to be configured in your .env file:
+
+CELERY_BROKER_URL: Specifies the URL for the Redis message broker.
+Default: redis://localhost:6379/0
+CELERY_RESULT_BACKEND: Specifies the URL for Redis to store task results.
+Default: redis://localhost:6379/0
+
+### Setting Up Redis
+Install Redis:
+
+For Linux:
+ ```bash
+sudo apt update
+sudo apt install redis
+```
+
+For macOS (using Homebrew):
+ ```bash
+brew install redis
+```
+
+For Windows, download Redis from the official website.
+
+Start Redis:
+
+```bash
+
+redis-server
+```
+
+Verify Redis is Running:
+
+```bash
+redis-cli ping
+```
+
+Expected output: PONG
+
+
+Starting Celery Worker -> Run the following command to start the Celery worker:
+
+```bash
+celery -A EquityOptimizerApp worker --loglevel=info
+```
+
+Optional: Starting Celery Beat Scheduler
+If you are using Celery Beat for periodic tasks, run:
+
+```bash
+celery -A EquityOptimizerApp beat --loglevel=info
+ ```
+
+8. Run the development server:
    ```bash
    python manage.py runserver
    ```
