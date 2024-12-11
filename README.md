@@ -2,24 +2,26 @@
 
 This project is deployed to Heroku and is available for testing at the following address: [Equity Optimizer App on Heroku](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/). It comes preloaded with over 400 stock tickers for immediate use.
 
+**Note**: Due to the limitations of lower-tier Heroku plans (specifically regarding RAM), simulations should currently be run with no more than **1500 simulation runs** to ensure optimal performance.
+**Note**: YFinance at the moment recognizes the Heroku Deployment as a commercial product and limits daily data, which obstructs stock price updates. Data is updated until including December 10th.
+
+
 ---
 
 ## About
 
 The **Equity Optimizer App** is designed to help users analyze and optimize their stock portfolios. The application provides a range of features to track stock performance and evaluate investment strategies.
 
-**Note**: Due to the limitations of lower-tier Heroku plans (specifically regarding RAM), simulations should currently be run with no more than **1500 simulation runs** to ensure optimal performance.
-
 ---
 
 ## Features
 
 - **User Authentication and Profile Management**
-- **Portfolio Management**: Add and manage stocks in a portfolio.
+- **Portfolio Management**: Add and manage stocks in a portfolio via maintaining favorite lists and running simulations.
 - **Stock Details and Metrics**: View detailed stock performance metrics.
-- **Simulation Reports**: Generate and analyze reports for investment strategies.
+- **Simulation Reports**: Apply real-live Harry Markowitz efficient frontier simulation via Monte Carlos simulations with up to 50 stocks and up to 20 000 runs. Generate and analyze reports for investment strategies.
 - **Responsive Design**: Accessible on all devices.
-- **API Integration**: Includes robust API features for advanced integrations and data access:
+- **API Integration**: Includes API features for advanced integrations and data access:
   - [Production API Documentation](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/api/docs)
   - [Local API Documentation](http://127.0.0.1:8000/api/docs/)
 - **Asynchronous Email Notifications**: A welcome email is sent asynchronously to new users upon registration using Django signals.
@@ -27,6 +29,8 @@ The **Equity Optimizer App** is designed to help users analyze and optimize thei
 ---
 
 ## Installation
+
+**The EquityOptimizerApp requires Python 3.12**
 
 ### Step-by-Step Guide
 
@@ -103,6 +107,9 @@ The API will continue to be developed to support additional features and enhance
 
 The app is deployed on Heroku and available for testing at the following link: [https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/).
 
+**Note**: Due to the limitations of lower-tier Heroku plans (specifically regarding RAM), simulations should currently be run with no more than **1500 simulation runs** to ensure optimal performance.
+**Note**: YFinance at the moment recognizes the Heroku Deployment as a commercial product and limits daily data, which obstructs stock price updates. Data is updated until including December 10th.
+
 ## Additional Information
 
 ### Asynchronous Email Notification:
@@ -112,6 +119,12 @@ The accounts app includes a Django signal that triggers an asynchronous welcome 
 ### Simulation Restrictions:
 
 Simulations on Heroku should be limited to 1500 runs due to RAM constraints on lower-tier plans.
+
+### Historical Data:
+
+The App utilizes the Yfinace for fetching data about stocks. This API is intended only for educational purposes.
+
+The App has an abstract Data Fecther class, which could implemented with a different API provider. The intended API provider for commercial use would **Alpha Vantage**.
 
 ### SoftUni Graders:
 

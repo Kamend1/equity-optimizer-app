@@ -225,7 +225,7 @@ def find_missing_tickers_in_csv():
         return []
 
 
-upload_stock_data_from_csv('2024-12-06')
+# upload_stock_data_from_csv('2024-12-06')
 # save_stock_data_to_csv('2024-12-06')
 # process_tickers_from_csv()
 # find_missing_tickers_in_csv()
