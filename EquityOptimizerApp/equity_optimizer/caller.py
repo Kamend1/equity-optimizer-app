@@ -9,15 +9,12 @@ import yfinance as yf
 import csv
 
 from EquityOptimizerApp import settings
-from EquityOptimizerApp.equity_optimizer.services import StockService, YFinanceFetcher
 
-# Step 1: Set up Django settings environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'EquityOptimizerApp.settings')  # Replace 'your_project' with your actual project name
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'EquityOptimizerApp.settings')
 django.setup()
-
 from EquityOptimizerApp.equity_optimizer.models import Stock, StockData
-# from EquityOptimizerApp.equity_optimizer.services import check_stock_exists, add_stock_to_db, download_and_save_stock_data
-
+from EquityOptimizerApp.equity_optimizer.services import StockService, YFinanceFetcher
 
 def manually_update_stock_data(date):
 
@@ -228,7 +225,7 @@ def find_missing_tickers_in_csv():
         return []
 
 
-# upload_stock_data_from_csv('2024-11-28')
-# save_stock_data_to_csv('2024-11-28')
+upload_stock_data_from_csv('2024-12-06')
+# save_stock_data_to_csv('2024-12-06')
 # process_tickers_from_csv()
 # find_missing_tickers_in_csv()
