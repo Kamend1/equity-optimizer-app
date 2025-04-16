@@ -69,6 +69,9 @@ class StockDataService:
         stock_data_objects = []
         update_stock_data_objects = []
 
+        if isinstance(data.columns, pd.MultiIndex):
+            data.columns = [col[0] for col in data.columns]
+
         data['daily_return'] = data['Adj Close'].pct_change() * 100
         data['trend'] = data['daily_return'].apply(percentage_return_classifier)
         data.reset_index(inplace=True)
@@ -142,6 +145,9 @@ class StockDataService:
             if data.empty:
                 print(f"Warning: No data returned for {stock.ticker}. Skipping.")
                 continue
+
+            if isinstance(data.columns, pd.MultiIndex):
+                data.columns = [col[0] for col in data.columns]
 
             data['daily_return'] = data['Adj Close'].pct_change() * 100
             data['trend'] = data['daily_return'].apply(percentage_return_classifier)

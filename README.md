@@ -1,11 +1,5 @@
 # Equity Optimizer App
 
-This project is deployed to Heroku and is available for testing at the following address: [Equity Optimizer App on Heroku](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/). It comes preloaded with over 400 stock tickers for immediate use.
-
-**Note**: Due to the limitations of lower-tier Heroku plans (specifically regarding RAM), simulations should currently be run with no more than **1500 simulation runs** to ensure optimal performance.
-**Note**: YFinance at the moment recognizes the Heroku Deployment as a commercial product and limits daily data, which obstructs stock price updates. Data is updated until including December 10th.
-
-
 ---
 
 ## About
@@ -22,7 +16,6 @@ The **Equity Optimizer App** is designed to help users analyze and optimize thei
 - **Simulation Reports**: Apply real-live Harry Markowitz efficient frontier simulation via Monte Carlos simulations with up to 50 stocks and up to 20 000 runs. Generate and analyze reports for investment strategies.
 - **Responsive Design**: Accessible on all devices.
 - **API Integration**: Includes API features for advanced integrations and data access:
-  - [Production API Documentation](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/api/docs)
   - [Local API Documentation](http://127.0.0.1:8000/api/docs/)
 - **Asynchronous Email Notifications**: A welcome email is sent asynchronously to new users upon registration using Django signals.
 
@@ -155,17 +148,9 @@ Visit `http://127.0.0.1:8000/` in your browser to access the application. Sign u
 
 The app provides an API for advanced integrations and data access. You can explore the API and its features using the provided documentation:
 
-- [API Documentation](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/api/docs)
 - [Local API Documentation](http://127.0.0.1:8000/api/docs/)
 
 The API will continue to be developed to support additional features and enhance user functionality.
-
-## Testing
-
-The app is deployed on Heroku and available for testing at the following link: [https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/](https://equityoptimizerapp-9972d7f8e60a.herokuapp.com/).
-
-**Note**: Due to the limitations of lower-tier Heroku plans (specifically regarding RAM), simulations should currently be run with no more than **1500 simulation runs** to ensure optimal performance.
-**Note**: YFinance at the moment recognizes the Heroku Deployment as a commercial product and limits daily data, which obstructs stock price updates. Data is updated until including December 10th.
 
 ## Additional Information
 
@@ -175,7 +160,7 @@ The accounts app includes a Django signal that triggers an asynchronous welcome 
 
 ### Simulation Restrictions:
 
-Simulations on Heroku should be limited to 1500 runs due to RAM constraints on lower-tier plans.
+Simulations are currently limited to 20 000 runs due to processing constraints on lower-tier plans.
 
 ### Historical Data:
 
