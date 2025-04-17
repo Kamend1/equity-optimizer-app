@@ -166,7 +166,7 @@ Simulations are currently limited to 20 000 runs due to processing constraints o
 
 The App utilizes the Yfinace for fetching data about stocks. This API is intended only for educational purposes.
 
-The App has an abstract Data Fecther class, which could implemented with a different API provider. The intended API provider for commercial use would **Alpha Vantage**.
+The App has an abstract Data Fetcher class, which could implemented with a different API provider. The intended API provider for commercial use would **Alpha Vantage**.
 
 ### SoftUni Graders:
 
